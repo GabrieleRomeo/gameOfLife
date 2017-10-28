@@ -1,0 +1,83 @@
+{
+  "name": "gameOfLife",
+  "version": "0.0.0-development",
+  "description":
+    "The zero-player game where its evolution is determined by its initial state",
+  "main": "index.js",
+  "scripts": {
+    "setup": "npm install",
+    "postsetup": "semantic-release-cli setup",
+    "build": "NODE_ENV=production webpack -p",
+    "build:dev": "webpack -d",
+    "dev": "webpack-dev-server --open-page '.'",
+    "docs": "jsdoc --readme ./__jsDoc__/home_manifest.md -c .jsdocrc ",
+    "postdocs": "doxdox 'src/**/*.js' --layout github-wiki --output wiki.zip",
+    "docs:open": "opn ./__docs__/index.html",
+    "format": "prettier --config .prettierrc --write \"src/**/*.js\"",
+    "lint": "eslint src",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "posttest:coverage": "opn ./__coverage__/lcov-report/index.html",
+    "test:update": "jest -u",
+    "watch": "webpack --watch",
+    "semantic-release":
+      "semantic-release pre && npm publish && semantic-release post",
+    "changelog:preview": "sr-changelog",
+    "changelog:commit": "sr-changelog commit"
+  },
+  "pre-commit": ["lint"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GabrieleRomeo/ES6-Professional-starter-kit.git"
+  },
+  "jest": {
+    "verbose": true,
+    "coverageDirectory": "./__coverage__"
+  },
+  "release": {
+    "analyzeCommits": "semantic-release-tamia/analyzeCommits",
+    "generateNotes": "semantic-release-tamia/generateNotes",
+    "verifyRelease": "semantic-release-tamia/verifyRelease"
+  },
+  "keywords": ["automaton", "cellular automaton"],
+  "author": "Gabriele Romeo",
+  "license": "MIT",
+  "bugs": {
+    "url":
+      "https://github.com/GabrieleRomeo/ES6-Professional-starter-kit/issues"
+  },
+  "homepage":
+    "https://github.com/GabrieleRomeo/ES6-Professional-starter-kit/#readme",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.0.1",
+    "babel-jest": "^21.2.0",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-dynamic-import-node": "^1.1.0",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-stage-2": "^6.24.1",
+    "boxy-jsdoc-template": "^1.3.0",
+    "doxdox": "^2.0.3",
+    "doxdox-plugin-github-wiki": "^1.1.3",
+    "eslint": "^4.8.0",
+    "eslint-config-airbnb": "^16.0.0",
+    "eslint-config-prettier": "^2.6.0",
+    "eslint-loader": "^1.9.0",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-jsx-a11y": "^6.0.2",
+    "eslint-plugin-prettier": "^2.3.1",
+    "eslint-plugin-react": "^7.4.0",
+    "jest": "^21.2.1",
+    "jsdoc": "^3.5.5",
+    "minami": "^1.2.3",
+    "opn": "^5.1.0",
+    "opn-cli": "^3.1.0",
+    "pre-commit": "^1.2.2",
+    "prettier": "^1.7.4",
+    "semantic-release": "^8.2.0",
+    "semantic-release-cli": "^3.2.2",
+    "semantic-release-tamia": "^1.1.1",
+    "webpack": "^3.7.1",
+    "webpack-dev-server": "^2.9.1"
+  }
+}
