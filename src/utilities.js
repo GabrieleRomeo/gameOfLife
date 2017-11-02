@@ -1,3 +1,6 @@
+export const MathFloor = Math.floor;
+export const MathRnd = Math.random;
+
 /**
  * Returns the data type of the provided argument
  *
@@ -39,3 +42,12 @@ export const is = what => item => type(item) === what;
  *                      otherwise it returns the alternative value
  */
 export const evaluate = pred => (d, a) => (pred(d) ? d : a);
+
+/**
+ * Get a random integer
+ * @param  {Number} [max]  The upper limit (defualt 10 - not included)
+ * @param  {Number} [min]  The lower limit (default 0 - included)
+ * @return {Number}      A random integer from min to max
+ */
+export const getRandomInt = (max = 10, min = 0) =>
+  MathFloor(MathRnd() * (max - min)) + min;
