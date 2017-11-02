@@ -20,16 +20,13 @@ class Animation {
     this.frame = 0;
     this.animating = false;
 
-    window.requestAnimationFrame = (callback => {
-      return (
-        window.requestAnimationFrame ||
-        window.webkitRequestAnimationFrame ||
-        window.msRequestAnimationFrame ||
-        window.oRequestAnimationFrame ||
-        window.mozRequestAnimationFrame ||
-        (() => window.setTimeout(callback, 1000 / 60))
-      );
-    })();
+    window.requestAnimationFrame = (callback =>
+      window.requestAnimationFrame ||
+      window.webkitRequestAnimationFrame ||
+      window.msRequestAnimationFrame ||
+      window.oRequestAnimationFrame ||
+      window.mozRequestAnimationFrame ||
+      (() => window.setTimeout(callback, 1000 / 60)))();
   }
   /**
    * Get the Canvas element.
@@ -106,7 +103,7 @@ class Animation {
    * @returns {void}
    */
   animationLoop() {
-    this.frame++;
+    this.frame += 1;
     const date = new Date();
     const time = date.getTime();
 
