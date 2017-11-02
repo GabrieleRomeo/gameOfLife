@@ -12,7 +12,7 @@ class Animation {
    */
   constructor($canvasElement) {
     this.$canvasElement = $canvasElement;
-    this.context = Context($canvasElement);
+    this.context = new Context($canvasElement);
     this.t = 0;
     this.timeInterval = 0;
     this.startTime = 0;
