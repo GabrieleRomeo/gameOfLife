@@ -1,7 +1,11 @@
 import Context from './Context';
+import { copy } from './utilities';
+
+const baseConfig = {};
+
 /**
  * Class for animation.
- * Revised version of the animation.js by Eric Rowell
+ * Revised & improved version of the animation.js by Eric Rowell
  *
  * @class      Animation (name)
  */
@@ -10,9 +14,10 @@ class Animation {
    * Create an Animation
    * @param {number} $canvasElement - The HTML canvas object
    */
-  constructor($canvasElement) {
-    this.$canvasElement = $canvasElement;
-    this.context = new Context($canvasElement);
+  constructor($onScreenCanvas, config = {}) {
+    this.config = copy({}, baseConfig, config);
+    this.canvas = $onScreenCanvas;
+    this.context = new Context(this.canvas);
     this.t = 0;
     this.timeInterval = 0;
     this.startTime = 0;
@@ -33,26 +38,21 @@ class Animation {
    * @return {HTMLCanvasElement} The Canvas element.
    */
   getCanvas() {
-    return this.$canvasElement;
+    return this.$offScreenCanvas;
   }
   /**
    * Get the Canvas's context object.
    * @return {Context} The context object.
    */
   getContext() {
-    return this.context;
+    return this.context.getContext();
   }
   /**
    * Clear the Canvas
    * @return {void}
    */
   clear() {
-    this.context.clearRect(
-      0,
-      0,
-      this.$canvasElement.width,
-      this.$canvasElement.height,
-    );
+    this.context.clear();
   }
   /**
    * Set the function that will execute for each animation frame
@@ -60,6 +60,13 @@ class Animation {
    */
   setStage(stage) {
     this.stage = stage;
+  }
+  /**
+   * Handles the rendering on the canvas
+   * @returns {void}
+   */
+  renderOnCanvas() {
+    this.context.renderOnCanvas();
   }
   /**
    * Get the animation's state
@@ -98,6 +105,7 @@ class Animation {
   getFps() {
     return this.timeInterval > 0 ? 1000 / this.timeInterval : 0;
   }
+
   /**
    * Handles the animation loop
    * @returns {void}
