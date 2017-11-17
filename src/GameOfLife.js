@@ -38,7 +38,7 @@ const generateRndPixels = (length, rows, cols, pxConfig = baseConfig.pixel) => {
   };
 };
 
-const generateMinRndPixels = (length = baseConfig.randomPixels, rows, cols) => {
+const defineMinRndPixels = (length = baseConfig.randomPixels, rows, cols) => {
   const num = isNumber(length) ? length : 1;
   const totCells = rows * cols;
   let minPixels = totCells * 10 / 100;
@@ -62,7 +62,7 @@ const initBuffer = ctx => {
   const cols = MathFloor(canvas.width / pixel.width);
   const rows = MathFloor(canvas.height / pixel.height);
 
-  const numOfPixels = generateMinRndPixels(randomPixels, rows, cols);
+  const numOfPixels = defineMinRndPixels(randomPixels, rows, cols);
   const { pixels, matrix } = generateRndPixels(numOfPixels, rows, cols, pixel);
 
   return {
