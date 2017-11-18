@@ -1,12 +1,13 @@
-import { MathFloor, getRandomInt, copy, is, evaluate } from './utilities';
+import { MathFloor, getRandomInt, copy, is, isDefined } from './utilities';
 import Pixel from './Pixel';
 import Animation from './Animation';
 import BufferWorker from './workers/Buffer.worker';
 
+const minWidth = 300;
+const minHeight = 100;
 const baseConfig = {
   canvas: {
-    height: window.innerHeight,
-    width: window.innerWidth,
+    fullScreen: false,
   },
   pixel: {
     height: 10,
@@ -17,7 +18,7 @@ const baseConfig = {
 
 const isCanvas = is('HTMLCanvasElement');
 const isNumber = is('Number');
-const canvasEvaluation = evaluate(isCanvas);
+
 const bufferWorker = new BufferWorker();
 
 const generateRndPixels = (length, rows, cols, pxConfig = baseConfig.pixel) => {
@@ -38,7 +39,7 @@ const generateRndPixels = (length, rows, cols, pxConfig = baseConfig.pixel) => {
   };
 };
 
-const defineMinRndPixels = (length = baseConfig.randomPixels, rows, cols) => {
+const validateRndNumber = (length = baseConfig.randomPixels, rows, cols) => {
   const num = isNumber(length) ? length : 1;
   const totCells = rows * cols;
   let minPixels = totCells * 10 / 100;
@@ -53,16 +54,72 @@ const defineMinRndPixels = (length = baseConfig.randomPixels, rows, cols) => {
     minPixels = totCells;
   }
 
-  return minPixels;
+  return Math.floor(minPixels);
+};
+
+const createNewCanvas = () => {
+  const $canvas = document.createElement('CANVAS');
+  document.body.appendChild($canvas);
+  return $canvas;
+};
+
+const initCanvas = ($element, ctx) => {
+  const $canvas = isCanvas($element) ? $element : createNewCanvas();
+  const $canvasWidth = $canvas.width;
+  const $canvasHeight = $canvas.height;
+  const { width, height } = ctx.config.canvas;
+  const { fullScreen } = ctx.config;
+  let finalWidth = minWidth;
+  let finalHeight = minHeight;
+
+  /*
+   * The rules used to define the final Canvas' size are the following ones
+   * (in order of priority) :
+   *   [1] - `fullScreen` option set to true
+   *   [2] - Width & height in the config object
+   *   [3] - Width & height parameter used to define the HTML canvas element
+   *   [4] - minWidth & minHeight is no one of the previous option has been used
+   *
+   */
+
+  // Define Width
+  if (isDefined(width) && isNumber(width)) {
+    if (width > minWidth) {
+      finalWidth = width;
+    }
+  } else if ($canvasWidth >= minWidth) {
+    finalWidth = $canvasWidth;
+  }
+
+  // Define Height
+  if (isDefined(height) && isNumber(height)) {
+    if (height > minHeight) {
+      finalHeight = height;
+    }
+  } else if ($canvasHeight > minHeight) {
+    finalHeight = $canvasHeight;
+  }
+
+  // If the fullScreen option has been used, it wins
+  if (isDefined(fullScreen) && fullScreen === true) {
+    finalWidth = window.innerWidth;
+    finalHeight = window.innerHeight;
+  }
+
+  $canvas.width = finalWidth;
+  $canvas.height = finalHeight;
+
+  return $canvas;
 };
 
 const initBuffer = ctx => {
-  const { pixel, canvas, randomPixels } = ctx.config;
+  const { $canvas } = ctx;
+  const { pixel, randomPixels } = ctx.config;
 
-  const cols = MathFloor(canvas.width / pixel.width);
-  const rows = MathFloor(canvas.height / pixel.height);
+  const cols = MathFloor($canvas.width / pixel.width);
+  const rows = MathFloor($canvas.height / pixel.height);
 
-  const numOfPixels = defineMinRndPixels(randomPixels, rows, cols);
+  const numOfPixels = validateRndNumber(randomPixels, rows, cols);
   const { pixels, matrix } = generateRndPixels(numOfPixels, rows, cols, pixel);
 
   return {
@@ -94,19 +151,13 @@ const drawPixels = (anim, pixels, pixelConfig) => {
 };
 
 class GameOfLife {
-  constructor(config) {
+  constructor($canvas, config) {
     const self = this;
     let fps = 0;
 
     this.pixels = [];
     this.config = copy({}, baseConfig, config);
-    this.$canvas = canvasEvaluation(
-      this.config.$canvasElement,
-      document.createElement('CANVAS'),
-    );
-
-    this.$canvas.width = this.config.canvas.width;
-    this.$canvas.height = this.config.canvas.height;
+    this.$canvas = initCanvas($canvas, this);
     this.buffer = initBuffer(this);
 
     this.animation = new Animation(this.$canvas);
