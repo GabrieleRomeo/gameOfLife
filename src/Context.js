@@ -19,6 +19,9 @@ class Context {
         this.ctx.font = style;
       },
       lineTo: (x, y) => this.ctx.lineTo(x, y),
+      lineWidth: width => {
+        this.ctx.lineWith = width;
+      },
       moveTo: (x, y) => this.ctx.moveTo(x, y),
       stroke: () => this.ctx.stroke(),
       rect: (x, y, width, height) => this.ctx.rect(x, y, width, height),
