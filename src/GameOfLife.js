@@ -1,23 +1,134 @@
-import { MathFloor, getRandomInt, copy, is, isDefined } from './utilities';
+import {
+  MathFloor,
+  getRandomInt,
+  is,
+  isDefined,
+  isColor,
+  randomRGBA,
+  flatten,
+} from './utilities';
 import Pixel from './Pixel';
 import Animation from './Animation';
 import BufferWorker from './workers/Buffer.worker';
 
+const isCanvas = is('HTMLCanvasElement');
+const isObj = is('Object');
+const isNumber = is('Number');
+const isBoolean = is('Boolean');
+const isInteger = x => is('Number')(x) && parseInt(x, 10) === x;
+const isInTheRange = (min = 0, max) => x => min >= x && x <= max;
+const isGreatherThan = y => x => x > y;
+const evaluateRules = (rules, value) =>
+  rules.reduce((r, check) => {
+    const test = check(value);
+    return r && test;
+  }, true);
+
 const minWidth = 300;
 const minHeight = 100;
+
+const canvasWidthMinValue = 200;
+const canvasHeightMinValue = 200;
+
 const baseConfig = {
   canvas: {
-    fullScreen: false,
+    width: {
+      defaultValue: 800,
+      minValue: canvasWidthMinValue,
+      rules: [isInteger],
+    },
+    height: {
+      defaultValue: 500,
+      minValue: canvasHeightMinValue,
+      rules: [isInteger, isGreatherThan(canvasHeightMinValue)],
+    },
+    fullScreen: {
+      defaultValue: false,
+      rules: [isBoolean],
+    },
+    showGrid: {
+      defaultValue: true,
+      rules: [isBoolean],
+    },
   },
   pixel: {
-    height: 10,
-    width: 10,
+    height: {
+      defaultValue: 10,
+      rules: [isInteger, isInTheRange(1, 10)],
+    },
+    width: {
+      defaultValue: 10,
+      rules: [isInteger, isInTheRange(1, 10)],
+    },
+    bgcolor: {
+      defaultValue: `#000`,
+      rules: [isColor],
+    },
+    randomColors: {
+      defaultValue: true,
+      rules: [isBoolean],
+    },
   },
-  randomPixels: 1000,
+  randomPixels: {
+    defaultValue: 1000,
+    rules: [isInteger, isInTheRange(0, 10)],
+  },
 };
 
-const isCanvas = is('HTMLCanvasElement');
-const isNumber = is('Number');
+const evaluateResult = (
+  defaultValue,
+  minValue,
+  maxValue = Number.MAX_SAFE_INTEGER,
+) => userValue => {
+  // Take the evaluation only for numerical datatype
+  if (!isNumber(defaultValue)) {
+    return defaultValue;
+  }
+
+  let result;
+  if (userValue < minValue) {
+    result = minValue;
+  } else if (userValue > maxValue) {
+    result = maxValue;
+  } else {
+    result = defaultValue;
+  }
+  return result;
+};
+
+/* eslint-disable no-param-reassign */
+const validateConfig = (base, config, target = {}) =>
+  Object.keys(base).reduce((result, prop) => {
+    const subObject = base[prop];
+
+    if (isDefined(subObject.defaultValue)) {
+      const { defaultValue, minValue, maxValue } = subObject;
+      const rEval = evaluateResult(defaultValue, minValue, maxValue);
+      const userValue = config[prop];
+      const isValid = evaluateRules(subObject.rules, userValue);
+      result[prop] = isValid ? userValue : rEval(userValue);
+    } else if (!isObj(subObject)) {
+      result[prop] = subObject;
+    } else {
+      result[prop] = {};
+      Object.keys(subObject).forEach(innerProp => {
+        const innerValue = base[prop][innerProp];
+        if (!isObj(innerValue)) {
+          result[prop][innerProp] = innerValue;
+        } else {
+          // The value actually is an Object
+          const { defaultValue, minValue, maxValue } = base[prop][innerProp];
+          const userValue = config[prop][innerProp];
+          const rEval = evaluateResult(defaultValue, minValue, maxValue);
+          const isValid = evaluateRules(innerValue.rules, userValue);
+
+          result[prop][innerProp] = isValid ? userValue : rEval(userValue);
+        }
+      });
+    }
+    return result;
+  }, target);
+/* eslint-enable no-param-reassign */
 
 const bufferWorker = new BufferWorker();
 
@@ -130,6 +241,49 @@ const initBuffer = ctx => {
   };
 };
 
+const drawGrid = (anim, cols, rows, pixelConfig) => {
+  const context = anim.getContext();
+  const minY = 0;
+  const maxY = cols * pixelConfig.height;
+  const minX = 0;
+  const iStrokeWidth = 1;
+  const iTranslate = (iStrokeWidth % 2) / 2;
+
+  // Draw ROWS
+  for (let r = 1; r < rows; r += 1) {
+    context.translate(iTranslate, 0);
+    context.save();
+    context.beginPath();
+    context.strokeStyle('rgba(0, 0, 0, 1)');
+    context.moveTo(minX, r * pixelConfig.height);
+    context.lineTo(maxY, r * pixelConfig.height);
+    context.lineWidth(iStrokeWidth);
+    context.stroke();
+    context.restore();
+
+    // reset the translation back to zero
+    context.translate(-iTranslate, 0);
+  }
+
+  // Draw COLUMNS
+  for (let c = 1; c < cols; c += 1) {
+    context.translate(iTranslate, 0);
+    context.save();
+    context.beginPath();
+    context.strokeStyle('rgba(0, 0, 0, 1)');
+    context.moveTo(c * pixelConfig.width, minY);
+    context.lineTo(c * pixelConfig.height, maxY);
+    context.lineWidth(iStrokeWidth);
+    context.stroke();
+    context.restore();
+
+    // reset the translation back to zero
+    context.translate(-iTranslate, 0);
+  }
+
+  anim.renderOnCanvas();
+};
+
 const drawFps = (anim, fps) => {
   const context = anim.getContext();
   context.fillStyle('black');
@@ -145,6 +299,8 @@ const drawPixels = (anim, pixels, pixelConfig) => {
   // eslint-disable-next-line no-cond-assign
   while ((i -= 1)) {
     const { x, y } = pixels[i];
+    // eslint-disable-next-line no-param-reassign
+    pixelConfig.bgcolor = randomRGBA();
     const pixel = new Pixel(x, y, pixelConfig);
     pixel.render(anim);
   }
@@ -156,11 +312,19 @@ class GameOfLife {
     let fps = 0;
 
     this.pixels = [];
-    this.config = copy({}, baseConfig, config);
+    this.test = flatten(validateConfig(baseConfig, config));
+    this.config = validateConfig(baseConfig, config);
     this.$canvas = initCanvas($canvas, this);
     this.buffer = initBuffer(this);
 
     this.animation = new Animation(this.$canvas);
+
+    drawGrid(
+      this.animation,
+      this.buffer.cols,
+      this.buffer.rows,
+      this.config.pixel,
+    );
 
     this.animation.setStage(function animationLoop() {
       const anim = this;
@@ -177,6 +341,8 @@ class GameOfLife {
       bufferWorker.onmessage = event => {
         // clear the canvas
         anim.clear();
+
+        drawGrid(anim, event.data.cols, event.data.rows, self.config.pixel);
         // draw Pixels
         drawPixels(anim, event.data.pixels, self.config.pixel);
         // Update the Buffer
@@ -205,6 +371,11 @@ class GameOfLife {
 
   toDataURL() {
     return this.canvas.toDataURL();
+  }
+
+  setRandomPixelColor() {
+    const { randomColors } = this.config.pixel.randomColors;
+    this.config.pixel.randomColors = !randomColors;
   }
 
   start() {
