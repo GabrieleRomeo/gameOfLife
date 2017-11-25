@@ -5,11 +5,13 @@ import {
   isDefined,
   isColor,
   randomRGBA,
-  flatten,
 } from './utilities';
 import Pixel from './Pixel';
 import Animation from './Animation';
 import BufferWorker from './workers/Buffer.worker';
+
+const minNum = Number.MIN_SAFE_INTEGER;
+const maxNum = Number.MAX_SAFE_INTEGER;
 
 const isCanvas = is('HTMLCanvasElement');
 const isObj = is('Object');
@@ -54,10 +56,12 @@ const baseConfig = {
   pixel: {
     height: {
       defaultValue: 10,
+      minValue: 1,
       rules: [isInteger, isInTheRange(1, 10)],
     },
     width: {
       defaultValue: 10,
+      minValue: 1,
       rules: [isInteger, isInTheRange(1, 10)],
     },
     bgcolor: {
@@ -75,11 +79,7 @@ const baseConfig = {
   },
 };
 
-const evaluateResult = (
-  defaultValue,
-  minValue,
-  maxValue = Number.MAX_SAFE_INTEGER,
-) => userValue => {
+const evaluateResult = (defaultValue, minValue, maxValue) => userValue => {
   // Take the evaluation only for numerical datatype
   if (!isNumber(defaultValue)) {
     return defaultValue;
@@ -99,33 +99,29 @@ const evaluateResult = (
 /* eslint-disable no-param-reassign */
 const validateConfig = (base, config, target = {}) =>
   Object.keys(base).reduce((result, prop) => {
-    const subObject = base[prop];
+    const subItem = base[prop];
 
-    if (isDefined(subObject.defaultValue)) {
-      const { defaultValue, minValue, maxValue } = subObject;
+    // When the item contains a default value it means that it's a leaf
+    if (isDefined(subItem.defaultValue)) {
+      const { defaultValue, minValue, maxValue } = subItem;
       const rEval = evaluateResult(defaultValue, minValue, maxValue);
       const userValue = config[prop];
-      const isValid = evaluateRules(subObject.rules, userValue);
+      const isValid = evaluateRules(subItem.rules, userValue);
       result[prop] = isValid ? userValue : rEval(userValue);
-    } else if (!isObj(subObject)) {
-      result[prop] = subObject;
+      // If the data type is numeric, it tries to establish the min and max
+      // values
+      if (isNumber(defaultValue)) {
+        result[`${prop}_min`] = minValue || minNum;
+        result[`${prop}_max`] = maxValue || maxNum;
+      }
+    } else if (!isObj(subItem)) {
+      result[prop] = subItem;
     } else {
-      result[prop] = {};
-      Object.keys(subObject).forEach(innerProp => {
-        const innerValue = base[prop][innerProp];
-        if (!isObj(innerValue)) {
-          result[prop][innerProp] = innerValue;
-        } else {
-          // The value actually is an Object
-          const { defaultValue, minValue, maxValue } = base[prop][innerProp];
-          const userValue = config[prop][innerProp];
-          const rEval = evaluateResult(defaultValue, minValue, maxValue);
-          const isValid = evaluateRules(innerValue.rules, userValue);
-
-          result[prop][innerProp] = isValid ? userValue : rEval(userValue);
-        }
-      });
+      // When the subItem is an Object itself
+      // Use recursion to iterate its items
+      result[prop] = validateConfig(subItem, config, result[prop]);
     }
+
     return result;
   }, target);
 /* eslint-enable no-param-reassign */
@@ -174,41 +170,35 @@ const createNewCanvas = () => {
   return $canvas;
 };
 
-const initCanvas = ($element, ctx) => {
+const initCanvas = ($element, config) => {
   const $canvas = isCanvas($element) ? $element : createNewCanvas();
   const $canvasWidth = $canvas.width;
   const $canvasHeight = $canvas.height;
-  const { width, height } = ctx.config.canvas;
-  const { fullScreen } = ctx.config;
+  const { width, height, fullScreen } = config.canvas;
   let finalWidth = minWidth;
   let finalHeight = minHeight;
 
   /*
-   * The rules used to define the final Canvas' size are the following ones
+   * The rules used to define the final Canvas' size are as follow:
    * (in order of priority) :
-   *   [1] - `fullScreen` option set to true
-   *   [2] - Width & height in the config object
+   *   [1] - `fullScreen` option
+   *   [2] - Width & height in the canvas config object
    *   [3] - Width & height parameter used to define the HTML canvas element
-   *   [4] - minWidth & minHeight is no one of the previous option has been used
    *
    */
 
   // Define Width
-  if (isDefined(width) && isNumber(width)) {
-    if (width > minWidth) {
-      finalWidth = width;
-    }
-  } else if ($canvasWidth >= minWidth) {
+  if ($canvasWidth >= minWidth) {
     finalWidth = $canvasWidth;
+  } else {
+    finalWidth = width;
   }
 
   // Define Height
-  if (isDefined(height) && isNumber(height)) {
-    if (height > minHeight) {
-      finalHeight = height;
-    }
-  } else if ($canvasHeight > minHeight) {
+  if ($canvasHeight > minHeight) {
     finalHeight = $canvasHeight;
+  } else {
+    finalHeight = height;
   }
 
   // If the fullScreen option has been used, it wins
@@ -312,9 +302,8 @@ class GameOfLife {
     let fps = 0;
 
     this.pixels = [];
-    this.test = flatten(validateConfig(baseConfig, config));
     this.config = validateConfig(baseConfig, config);
-    this.$canvas = initCanvas($canvas, this);
+    this.$canvas = initCanvas($canvas, this.config);
     this.buffer = initBuffer(this);
 
     this.animation = new Animation(this.$canvas);
