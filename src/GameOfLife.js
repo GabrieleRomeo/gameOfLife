@@ -17,6 +17,7 @@ const isCanvas = is('HTMLCanvasElement');
 const isObj = is('Object');
 const isNumber = is('Number');
 const isBoolean = is('Boolean');
+const isFunction = is('Function');
 const isInteger = x => is('Number')(x) && parseInt(x, 10) === x;
 const isInTheRange = (min = 0, max) => x => min >= x && x <= max;
 const isGreatherThan = y => x => x > y;
@@ -100,10 +101,12 @@ const evaluateResult = (defaultValue, minValue, maxValue) => userValue => {
 const validateConfig = (base, config, target = {}) =>
   Object.keys(base).reduce((result, prop) => {
     const subItem = base[prop];
+    const subValue = subItem.defaultValue;
 
     // When the item contains a default value it means that it's a leaf
-    if (isDefined(subItem.defaultValue)) {
-      const { defaultValue, minValue, maxValue } = subItem;
+    if (isDefined(subValue)) {
+      const defaultValue = isFunction(subValue) ? subValue() : subValue;
+      const { minValue, maxValue } = subItem;
       const rEval = evaluateResult(defaultValue, minValue, maxValue);
       const userValue = config[prop];
       const isValid = evaluateRules(subItem.rules, userValue);
