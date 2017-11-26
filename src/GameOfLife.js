@@ -179,9 +179,11 @@ const createNewCanvas = () => {
 
 const initCanvas = ($element, config) => {
   const $canvas = isCanvas($element) ? $element : createNewCanvas();
-  // const $canvasWidth = $canvas.width;
-  // const $canvasHeight = $canvas.height;
   const { width, height, fullScreen } = config.canvas;
+  const $canvasWidth = parseInt($canvas.getAttribute('width'), 10);
+  const $canvasHeight = parseInt($canvas.getAttribute('height'), 10);
+  const hasMinimumWidth = isGreatherThan(canvasWidthMinValue);
+  const hasMinimumHeight = isGreatherThan(canvasHeightMinValue);
   let finalWidth = width;
   let finalHeight = height;
 
@@ -189,10 +191,18 @@ const initCanvas = ($element, config) => {
    * The rules used to define the final Canvas' size are as follow:
    * (in order of priority) :
    *   [1] - `fullScreen` option
-   *   [2] - Width & height in the canvas config object
-   *   [3] - Width & height parameter used to define the HTML canvas element
+   *   [2] - Width & height parameter used to define the HTML canvas element
+   *   [3] - Width & height defined into the canvas config object
    *
    */
+
+  if (!Number.isNaN($canvasWidth) && hasMinimumWidth($canvasWidth)) {
+    finalWidth = $canvasWidth;
+  }
+
+  if (!Number.isNaN($canvasHeight) && hasMinimumHeight($canvasHeight)) {
+    finalHeight = $canvasHeight;
+  }
 
   // If fullScreen is defined, use it
   if (isDefined(fullScreen) && fullScreen === true) {
