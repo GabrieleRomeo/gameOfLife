@@ -111,9 +111,13 @@ const validateConfig = (base, config, target = {}) =>
       const userValue = config[prop];
       const isValid = evaluateRules(subItem.rules, userValue);
       result[prop] = isValid ? userValue : rEval(userValue);
-      // If the data type is numeric, it tries to establish the min and max
-      // values
-      if (isNumber(defaultValue)) {
+      // If the default value has a number data type, and minValue or maxValue
+      // has been defined for the current property, use them (if any) or set
+      // them as the minimum or maximum safe number respectively
+      if (
+        isNumber(defaultValue) &&
+        (isDefined(minValue) || isDefined(maxValue))
+      ) {
         result[`${prop}_min`] = minValue || minNum;
         result[`${prop}_max`] = maxValue || maxNum;
       }
