@@ -27,8 +27,8 @@ const evaluateRules = (rules, value) =>
     return r && test;
   }, true);
 
-const minWidth = 300;
-const minHeight = 100;
+// const minWidth = 300;
+// const minHeight = 100;
 
 const canvasWidthMinValue = 200;
 const canvasHeightMinValue = 200;
@@ -38,7 +38,7 @@ const baseConfig = {
     width: {
       defaultValue: 800,
       minValue: canvasWidthMinValue,
-      rules: [isInteger],
+      rules: [isInteger, isGreatherThan(canvasWidthMinValue)],
     },
     height: {
       defaultValue: 500,
@@ -126,7 +126,7 @@ const validateConfig = (base, config, target = {}) =>
     } else {
       // When the subItem is an Object itself
       // Use recursion to iterate its items
-      result[prop] = validateConfig(subItem, config, result[prop]);
+      result[prop] = validateConfig(subItem, config[prop], result[prop]);
     }
 
     return result;
@@ -179,11 +179,11 @@ const createNewCanvas = () => {
 
 const initCanvas = ($element, config) => {
   const $canvas = isCanvas($element) ? $element : createNewCanvas();
-  const $canvasWidth = $canvas.width;
-  const $canvasHeight = $canvas.height;
+  // const $canvasWidth = $canvas.width;
+  // const $canvasHeight = $canvas.height;
   const { width, height, fullScreen } = config.canvas;
-  let finalWidth = minWidth;
-  let finalHeight = minHeight;
+  let finalWidth = width;
+  let finalHeight = height;
 
   /*
    * The rules used to define the final Canvas' size are as follow:
@@ -194,21 +194,7 @@ const initCanvas = ($element, config) => {
    *
    */
 
-  // Define Width
-  if ($canvasWidth >= minWidth) {
-    finalWidth = $canvasWidth;
-  } else {
-    finalWidth = width;
-  }
-
-  // Define Height
-  if ($canvasHeight > minHeight) {
-    finalHeight = $canvasHeight;
-  } else {
-    finalHeight = height;
-  }
-
-  // If the fullScreen option has been used, it wins
+  // If fullScreen is defined, use it
   if (isDefined(fullScreen) && fullScreen === true) {
     finalWidth = window.innerWidth;
     finalHeight = window.innerHeight;
