@@ -80,8 +80,8 @@ const baseConfig = {
   },
 };
 
-const evaluateResult = (defaultValue, minValue, maxValue) => userValue => {
-  // Take the evaluation only for numerical datatype
+const setMinMaxRange = (defaultValue, minValue, maxValue) => userValue => {
+  // Do the evaluation only for numerical datatype
   if (!isNumber(defaultValue)) {
     return defaultValue;
   }
@@ -107,10 +107,10 @@ const validateConfig = (base, config, target = {}) =>
     if (isDefined(subValue)) {
       const defaultValue = isFunction(subValue) ? subValue() : subValue;
       const { minValue, maxValue } = subItem;
-      const rEval = evaluateResult(defaultValue, minValue, maxValue);
+      const setRange = setMinMaxRange(defaultValue, minValue, maxValue);
       const userValue = config[prop];
       const isValid = evaluateRules(subItem.rules, userValue);
-      result[prop] = isValid ? userValue : rEval(userValue);
+      result[prop] = isValid ? userValue : setRange(userValue);
       // If the default value has a number data type, and minValue or maxValue
       // has been defined for the current property, use them (if any) or set
       // them as the minimum or maximum safe number respectively
