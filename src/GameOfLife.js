@@ -5,6 +5,7 @@ import {
   isDefined,
   isColor,
   randomRGBA,
+  deepMerge,
 } from './utilities';
 import Pixel from './Pixel';
 import Animation from './Animation';
@@ -216,12 +217,24 @@ const initCanvas = ($element, config) => {
   return $canvas;
 };
 
-const initBuffer = ctx => {
+const initColsRows = ctx => {
+  const configCopy = deepMerge({}, ctx.config);
   const { $canvas } = ctx;
-  const { pixel, randomPixels } = ctx.config;
+  const { pixel } = ctx.config;
 
   const cols = MathFloor($canvas.width / pixel.width);
   const rows = MathFloor($canvas.height / pixel.height);
+
+  // Add cols and rows to the new config object
+  configCopy.canvas.cols = cols;
+  configCopy.canvas.rows = rows;
+
+  return configCopy;
+};
+
+const initBuffer = config => {
+  const { cols, rows } = config.canvas;
+  const { pixel, randomPixels } = config;
 
   const numOfPixels = validateRndNumber(randomPixels, rows, cols);
   const { pixels, matrix } = generateRndPixels(numOfPixels, rows, cols, pixel);
@@ -233,13 +246,6 @@ const initBuffer = ctx => {
     rows,
   };
 };
-
-const draw = (animation, config, callback) =>
-  function drawCallback() {
-    if (isFunction(callback)) {
-      callback(animation, config);
-    }
-  };
 
 const drawGrid = (anim, cols, rows, pixelConfig) => {
   const context = anim.getContext();
@@ -314,7 +320,9 @@ class GameOfLife {
     this.pixels = [];
     this.config = validateConfig(baseConfig, config);
     this.$canvas = initCanvas($canvas, this.config);
-    this.buffer = initBuffer(this);
+
+    this.config = initColsRows(this);
+    this.buffer = initBuffer(this.config);
 
     this.animation = new Animation(this.$canvas);
 
