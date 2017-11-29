@@ -54,6 +54,10 @@ const baseConfig = {
       defaultValue: true,
       rules: [isBoolean],
     },
+    showFps: {
+      defaultValue: false,
+      rules: [isBoolean],
+    },
   },
   pixel: {
     height: {
@@ -327,40 +331,40 @@ class GameOfLife {
 
     this.animation = new Animation(this.$canvas);
 
-    drawGrid(
-      this.animation,
-      this.buffer.cols,
-      this.buffer.rows,
-      this.config.pixel,
-    );
-
     this.animation.setStage(function animationLoop() {
       const anim = this;
+      const { showGrid, showFps, cols, rows } = self.config.canvas;
+
+      if (showGrid === true) {
+        drawGrid(anim, cols, rows, self.config.pixel);
+      }
+
+      if (anim.getFrame() % 10 === 0) {
+        fps = anim.getFps();
+      }
 
       // update pixels and matrix
       bufferWorker.postMessage({
         buffer: self.buffer,
       });
 
-      if (anim.getFrame() % 10 === 0) {
-        fps = anim.getFps();
-      }
-
       bufferWorker.onmessage = event => {
-        const { pixels, matrix, cols, rows } = event.data;
+        const { pixels, matrix } = event.data;
 
         // clear the canvas
         anim.clear();
 
-        drawGrid(anim, cols, rows, self.config.pixel);
         // draw Pixels
         drawPixels(anim, pixels, self.config);
+
         // Update the Buffer
         self.buffer.pixels = pixels;
         self.buffer.matrix = matrix;
       };
 
-      drawFps(anim, fps);
+      if (showFps === true) {
+        drawFps(anim, fps);
+      }
     });
   }
 
