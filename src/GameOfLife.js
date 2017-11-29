@@ -347,15 +347,17 @@ class GameOfLife {
       }
 
       bufferWorker.onmessage = event => {
+        const { pixels, matrix, cols, rows } = event.data;
+
         // clear the canvas
         anim.clear();
 
-        drawGrid(anim, event.data.cols, event.data.rows, self.config.pixel);
+        drawGrid(anim, cols, rows, self.config.pixel);
         // draw Pixels
-        drawPixels(anim, event.data.pixels, self.config);
+        drawPixels(anim, pixels, self.config);
         // Update the Buffer
-        self.buffer.pixels = event.data.pixels;
-        self.buffer.matrix = event.data.matrix;
+        self.buffer.pixels = pixels;
+        self.buffer.matrix = matrix;
       };
 
       drawFps(anim, fps);
@@ -372,7 +374,7 @@ class GameOfLife {
   }
 
   start() {
-    drawPixels(this.animation, this.buffer.pixels, this.config.pixel);
+    drawPixels(this.animation, this.buffer.pixels, this.config);
     this.animation.start();
   }
   pause() {
