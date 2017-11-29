@@ -234,6 +234,13 @@ const initBuffer = ctx => {
   };
 };
 
+const draw = (animation, config, callback) =>
+  function drawCallback() {
+    if (isFunction(callback)) {
+      callback(animation, config);
+    }
+  };
+
 const drawGrid = (anim, cols, rows, pixelConfig) => {
   const context = anim.getContext();
   const minY = 0;
@@ -345,21 +352,6 @@ class GameOfLife {
       drawFps(anim, fps);
     });
   }
-
-  /*
-   * ||||
-   * ||||
-   * ||||
-   * ||||
-   * With
-   * ‘x’ = the row number (i.e. height or distance from the top of the Matrix)
-   * ‘y’ the column number (i.e. width or distance from the left of the Matrix)
-   * Then to get the index (x, y) use the below formula:
-   *    pixels[x][y] = 1d[ y + x * Total_number_of_columns_in_the_matrix ]
-   * x = 1
-   * y = 3
-   * 3 + (1 * 4)
-  */
 
   toDataURL() {
     return this.canvas.toDataURL();
