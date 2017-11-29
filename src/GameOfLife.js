@@ -300,14 +300,15 @@ const drawFps = (anim, fps) => {
   anim.renderOnCanvas();
 };
 
-const drawPixels = (anim, pixels, pixelConfig) => {
+const drawPixels = (anim, pixels, config) => {
+  const configCopy = deepMerge({}, config.pixel);
+  const { randomColors, bgcolor } = config.pixel;
   let i = pixels.length || 0;
   // eslint-disable-next-line no-cond-assign
   while ((i -= 1)) {
     const { x, y } = pixels[i];
-    // eslint-disable-next-line no-param-reassign
-    pixelConfig.bgcolor = randomRGBA();
-    const pixel = new Pixel(x, y, pixelConfig);
+    configCopy.bgcolor = randomColors === true ? randomRGBA() : bgcolor;
+    const pixel = new Pixel(x, y, configCopy);
     pixel.render(anim);
   }
 };
@@ -351,7 +352,7 @@ class GameOfLife {
 
         drawGrid(anim, event.data.cols, event.data.rows, self.config.pixel);
         // draw Pixels
-        drawPixels(anim, event.data.pixels, self.config.pixel);
+        drawPixels(anim, event.data.pixels, self.config);
         // Update the Buffer
         self.buffer.pixels = event.data.pixels;
         self.buffer.matrix = event.data.matrix;
