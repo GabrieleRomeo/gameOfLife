@@ -329,8 +329,9 @@ class GameOfLife {
     this.config = initColsRows(this);
     this.buffer = initBuffer(this.config);
 
-    this.animation = new Animation(this.$canvas);
+    this.iterationCount = 0;
 
+    this.animation = new Animation(this.$canvas);
     this.animation.setStage(function animationLoop() {
       const anim = this;
       const { showGrid, showFps, cols, rows } = self.config.canvas;
@@ -360,6 +361,9 @@ class GameOfLife {
         if (showFps === true) {
           drawFps(anim, fps);
         }
+
+        // Increment the number of iterations
+        self.iterationCount += 1;
 
         // Update the Buffer
         self.buffer.pixels = pixels;
