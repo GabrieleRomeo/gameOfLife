@@ -378,8 +378,11 @@ class GameOfLife {
   }
 
   start() {
-    drawPixels(this.animation, this.buffer.pixels, this.config);
-    this.animation.start();
+    // if the animation is not started yet
+    if (this.animation.isAnimating() === false) {
+      drawPixels(this.animation, this.buffer.pixels, this.config);
+      this.animation.start();
+    }
   }
   pause() {
     this.animation.stop();
