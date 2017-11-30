@@ -251,6 +251,16 @@ const initBuffer = config => {
   };
 };
 
+const setBackground = anim => {
+  const img = new Image();
+  const context = anim.getContext();
+  img.onload = function() {
+    context.drawImage(img, 0, 0);
+    anim.renderOnCanvas();
+  };
+  img.src = '/public/cartoon-landscape.svg';
+};
+
 const drawGrid = (anim, cols, rows, pixelConfig) => {
   const context = anim.getContext();
   const minY = 0;
@@ -330,14 +340,10 @@ class GameOfLife {
     this.buffer = initBuffer(this.config);
 
     this.animation = new Animation(this.$canvas);
-
+    setBackground(this.animation);
     this.animation.setStage(function animationLoop() {
       const anim = this;
       const { showGrid, showFps, cols, rows } = self.config.canvas;
-
-      if (showGrid === true) {
-        drawGrid(anim, cols, rows, self.config.pixel);
-      }
 
       if (anim.getFrame() % 10 === 0) {
         fps = anim.getFps();
@@ -357,14 +363,18 @@ class GameOfLife {
         // draw Pixels
         drawPixels(anim, pixels, self.config);
 
+        if (showGrid === true) {
+          drawGrid(anim, cols, rows, self.config.pixel);
+        }
+
+        if (showFps === true) {
+          drawFps(anim, fps);
+        }
+
         // Update the Buffer
         self.buffer.pixels = pixels;
         self.buffer.matrix = matrix;
       };
-
-      if (showFps === true) {
-        drawFps(anim, fps);
-      }
     });
   }
 
