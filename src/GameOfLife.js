@@ -113,7 +113,7 @@ const validateConfig = (base, config, target = {}) =>
       const defaultValue = isFunction(subValue) ? subValue() : subValue;
       const { minValue, maxValue } = subItem;
       const setRange = setMinMaxRange(defaultValue, minValue, maxValue);
-      const userValue = config[prop];
+      const userValue = isDefined(config) ? config[prop] : undefined;
       const isValid = evaluateRules(subItem.rules, userValue);
       result[prop] = isValid ? userValue : setRange(userValue);
       // If the default value has a number data type, and minValue or maxValue
@@ -329,8 +329,6 @@ class GameOfLife {
     this.config = initColsRows(this);
     this.buffer = initBuffer(this.config);
 
-    this.iterationCount = 0;
-
     this.animation = new Animation(this.$canvas);
     this.animation.setStage(function animationLoop() {
       const anim = this;
@@ -361,9 +359,6 @@ class GameOfLife {
         if (showFps === true) {
           drawFps(anim, fps);
         }
-
-        // Increment the number of iterations
-        self.iterationCount += 1;
 
         // Update the Buffer
         self.buffer.pixels = pixels;
