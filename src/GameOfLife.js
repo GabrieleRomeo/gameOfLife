@@ -83,6 +83,18 @@ const baseConfig = {
     defaultValue: 1000,
     rules: [isInteger, isInTheRange(0, 10)],
   },
+  takeSnapshots: {
+    defaultValue: false,
+    rules: [isBoolean],
+  },
+  snapshots: {
+    ratio: {
+      defaultValue: 0.5,
+      minValue: 0.2,
+      maxValue: 1,
+      rules: [isNumber],
+    },
+  },
 };
 
 const setMinMaxRange = (defaultValue, minValue, maxValue) => userValue => {
