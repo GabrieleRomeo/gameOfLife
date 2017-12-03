@@ -6,6 +6,7 @@ import {
   isColor,
   randomRGBA,
   deepMerge,
+  curry,
 } from './utilities';
 import Pixel from './Pixel';
 import Animation from './Animation';
@@ -83,16 +84,34 @@ const baseConfig = {
     defaultValue: 1000,
     rules: [isInteger, isInTheRange(0, 10)],
   },
-  takeSnapshots: {
-    defaultValue: false,
-    rules: [isBoolean],
-  },
-  snapshots: {
-    ratio: {
-      defaultValue: 0.5,
-      minValue: 0.2,
-      maxValue: 1,
-      rules: [isNumber],
+  timeFrame: {
+    record: {
+      defaultValue: false,
+      rules: [isBoolean],
+    },
+    show: {
+      defaultValue: false,
+      rules: [isBoolean],
+    },
+    $element: {
+      defaultValue: 'gofTimeFrame',
+    },
+    useSnapshots: {
+      defaultValue: false,
+      rules: [isBoolean],
+    },
+    snapshots: {
+      scale: {
+        defaultValue: 0.3,
+        minValue: 0.1,
+        rules: [isNumber, isInTheRange(0.1, maxNum)],
+      },
+      quality: {
+        defaultValue: 0.9,
+        minValue: 0.1,
+        maxValue: 1,
+        rules: [isNumber, isInTheRange(0.1, 1)],
+      },
     },
   },
 };
@@ -329,6 +348,77 @@ const drawPixels = (anim, pixels, config) => {
   }
 };
 
+const takeSnapshot = ($canvas, scale = 1, quality = 0.9) => {
+  // const pixelRatio = window.devicePixelRatio || 1;
+  const canvasCopy = document.createElement('CANVAS');
+  const ctxCopy = canvasCopy.getContext('2d');
+  const { height, width } = $canvas;
+
+  canvasCopy.width = scale * width;
+  canvasCopy.height = scale * height;
+
+  canvasCopy.style.width = `${scale * width}px`;
+  canvasCopy.style.height = `${scale * height}px`;
+
+  ctxCopy.mozImageSmoothingEnabled = false;
+  ctxCopy.imageSmoothingEnabled = false;
+
+  ctxCopy.scale(scale, scale);
+
+  ctxCopy.drawImage($canvas, 0, 0);
+
+  return canvasCopy.toDataURL('image/png', quality);
+};
+
+const logHelper = (anim, $canvas, config, pixels) => {
+  const step = {
+    frame__number: anim.getFrame(),
+    time: anim.getTime(),
+    number_of_Cells: pixels.length,
+  };
+  const { scale, quality, useSnapshots } = config.timeFrame;
+
+  if (useSnapshots === true) {
+    step.dataURL = takeSnapshot($canvas, scale, quality);
+  }
+
+  return step;
+};
+
+const renderLog = ($element, step) => {
+  const list = document.createElement('UL');
+  list.classList.add('gameOfLifeLog__list');
+  Object.keys(step).forEach(property => {
+    const value = `${step[property]}`;
+    const item = document.createElement('LI');
+    const keyDescription = document.createElement('SPAN');
+    const valDescription = document.createElement('SPAN');
+
+    item.classList.add('gameOfLifeLog__item');
+    keyDescription.classList.add('gameOfLifeLog__itemKey');
+    valDescription.classList.add('gameOfLifeLog__itemValue');
+
+    if (isDefined(value.match(/data:image\//))) {
+      const img = document.createElement('IMG');
+      img.classList.add('gameOfLife__snapshot');
+      img.src = value;
+      item.appendChild(img);
+    } else {
+      // Add key description
+      keyDescription.textContent = property.split('_').join(' ');
+      valDescription.append(value);
+
+      // Append key and value descriptions to the item
+      item.appendChild(keyDescription);
+      item.appendChild(valDescription);
+    }
+
+    // Append the item to the list
+    list.appendChild(item);
+  });
+  window.requestAnimationFrame(() => $element.appendChild(list));
+};
+
 class GameOfLife {
   constructor($canvas, config) {
     const self = this;
@@ -341,9 +431,12 @@ class GameOfLife {
     this.config = initColsRows(this);
     this.buffer = initBuffer(this.config);
 
+    this.$timeFrame = document.querySelector('#gofTimeFrame');
+
     this.animation = new Animation(this.$canvas);
     this.animation.setStage(function animationLoop() {
       const anim = this;
+      const log = curry(logHelper)(anim, self.$canvas, self.config);
       const { showGrid, showFps, cols, rows } = self.config.canvas;
 
       if (anim.getFrame() % 10 === 0) {
@@ -363,6 +456,8 @@ class GameOfLife {
 
         // draw Pixels
         drawPixels(anim, pixels, self.config);
+
+        renderLog(self.$timeFrame, log(pixels));
 
         if (showGrid === true) {
           drawGrid(anim, cols, rows, self.config.pixel);
@@ -392,6 +487,9 @@ class GameOfLife {
     // if the animation is not started yet
     if (this.animation.isAnimating() === false) {
       drawPixels(this.animation, this.buffer.pixels, this.config);
+      const log = curry(logHelper)(this.animation, this.$canvas, this.config);
+      renderLog(this.$timeFrame, log(this.buffer.pixels));
+      // console.log(log(this.buffer.pixels));
       this.animation.start();
     }
   }
