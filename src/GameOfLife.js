@@ -20,6 +20,7 @@ const isObj = is('Object');
 const isNumber = is('Number');
 const isBoolean = is('Boolean');
 const isFunction = is('Function');
+
 const isInteger = x => is('Number')(x) && parseInt(x, 10) === x;
 const isInTheRange = (min = 0, max) => x => x >= min && x <= max;
 const isGreatherThan = y => x => x > y;
@@ -94,8 +95,8 @@ const baseConfig = {
       rules: [isBoolean],
     },
     $element: {
-      defaultValue: 'gofTimeFrame',
-      rules: [],
+      defaultValue: x => document.querySelector(x || '#goflTimeFrame'),
+      rules: [isDefined],
     },
     useSnapshots: {
       defaultValue: false,
@@ -374,8 +375,8 @@ const takeSnapshot = ($canvas, scale = 1, quality = 0.9) => {
   return canvasCopy.toDataURL('image/png', quality);
 };
 
-const logHelper = (anim, $canvas, config, pixels) => {
-  const step = {
+const frameHelper = (anim, $canvas, config, pixels) => {
+  const frame = {
     frame__number: anim.getFrame(),
     time: anim.getTime(),
     number_of_Cells: pixels.length,
@@ -383,13 +384,13 @@ const logHelper = (anim, $canvas, config, pixels) => {
   const { scale, quality, useSnapshots } = config.timeFrame;
 
   if (useSnapshots === true) {
-    step.dataURL = takeSnapshot($canvas, scale, quality);
+    frame.dataURL = takeSnapshot($canvas, scale, quality);
   }
 
-  return step;
+  return frame;
 };
 
-const renderLog = ($element, step) => {
+const renderTimeFrame = ($element, step) => {
   const list = document.createElement('UL');
   list.classList.add('gameOfLifeLog__list');
   Object.keys(step).forEach(property => {
@@ -423,6 +424,21 @@ const renderLog = ($element, step) => {
   window.requestAnimationFrame(() => $element.appendChild(list));
 };
 
+const handleTimeFrame = (ctx, pixels) => {
+  const { animation, $canvas, config, frames } = ctx;
+  const { $element: $timeFrame } = config.timeFrame;
+  const createFrame = curry(frameHelper)(animation, $canvas, config);
+  const { record: recordFrames, show: showTimeFrame } = config.timeFrame;
+  // When necessary, record frames and render them
+  if (recordFrames === true) {
+    const frame = createFrame(pixels);
+    if (showTimeFrame === true) {
+      renderTimeFrame($timeFrame, frame);
+    }
+    frames.push(frame);
+  }
+};
+
 class GameOfLife {
   constructor($canvas, config) {
     const self = this;
@@ -435,12 +451,12 @@ class GameOfLife {
     this.config = initColsRows(this);
     this.buffer = initBuffer(this.config);
 
+    this.frames = [];
     this.$timeFrame = document.querySelector('#gofTimeFrame');
 
     this.animation = new Animation(this.$canvas);
     this.animation.setStage(function animationLoop() {
       const anim = this;
-      const log = curry(logHelper)(anim, self.$canvas, self.config);
       const { showGrid, showFps, cols, rows } = self.config.canvas;
 
       if (anim.getFrame() % 10 === 0) {
@@ -461,7 +477,7 @@ class GameOfLife {
         // draw Pixels
         drawPixels(anim, pixels, self.config);
 
-        renderLog(self.$timeFrame, log(pixels));
+        handleTimeFrame(self, pixels);
 
         if (showGrid === true) {
           drawGrid(anim, cols, rows, self.config.pixel);
@@ -491,9 +507,7 @@ class GameOfLife {
     // if the animation is not started yet
     if (this.animation.isAnimating() === false) {
       drawPixels(this.animation, this.buffer.pixels, this.config);
-      const log = curry(logHelper)(this.animation, this.$canvas, this.config);
-      renderLog(this.$timeFrame, log(this.buffer.pixels));
-      // console.log(log(this.buffer.pixels));
+      handleTimeFrame(this, this.buffer.pixels);
       this.animation.start();
     }
   }
