@@ -21,7 +21,7 @@ const isNumber = is('Number');
 const isBoolean = is('Boolean');
 const isFunction = is('Function');
 const isInteger = x => is('Number')(x) && parseInt(x, 10) === x;
-const isInTheRange = (min = 0, max) => x => min >= x && x <= max;
+const isInTheRange = (min = 0, max) => x => x >= min && x <= max;
 const isGreatherThan = y => x => x > y;
 const evaluateRules = (rules, value) =>
   rules.reduce((r, check) => {
@@ -95,6 +95,7 @@ const baseConfig = {
     },
     $element: {
       defaultValue: 'gofTimeFrame',
+      rules: [],
     },
     useSnapshots: {
       defaultValue: false,
@@ -134,10 +135,10 @@ const setMinMaxRange = (defaultValue, minValue, maxValue) => userValue => {
 };
 
 /* eslint-disable no-param-reassign */
-const validateConfig = (base, config, target = {}) =>
+const validateConfig = (base, config = {}, target = {}) =>
   Object.keys(base).reduce((result, prop) => {
     const subItem = base[prop];
-    const subValue = subItem.defaultValue;
+    const { defaultValue: subValue, rules = [] } = subItem;
 
     // When the item contains a default value it means that it's a leaf
     if (isDefined(subValue)) {
@@ -145,7 +146,7 @@ const validateConfig = (base, config, target = {}) =>
       const { minValue, maxValue } = subItem;
       const setRange = setMinMaxRange(defaultValue, minValue, maxValue);
       const userValue = isDefined(config) ? config[prop] : undefined;
-      const isValid = evaluateRules(subItem.rules, userValue);
+      const isValid = evaluateRules(rules, userValue);
       result[prop] = isValid ? userValue : setRange(userValue);
       // If the default value has a number data type, and minValue or maxValue
       // has been defined for the current property, use them (if any) or set
