@@ -145,7 +145,10 @@ const validateConfig = (base, config = {}, target = {}) =>
       const defaultValue = isFunction(subValue) ? subValue() : subValue;
       const { minValue, maxValue } = subItem;
       const setRange = setMinMaxRange(defaultValue, minValue, maxValue);
-      const userValue = isDefined(config) ? config[prop] : undefined;
+      const userValue =
+        isDefined(config) && isDefined(config[prop])
+          ? config[prop]
+          : defaultValue;
       const isValid = evaluateRules(rules, userValue);
       result[prop] = isValid ? userValue : setRange(userValue);
       // If the default value has a number data type, and minValue or maxValue
