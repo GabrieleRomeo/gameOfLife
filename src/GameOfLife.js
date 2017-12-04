@@ -1,13 +1,25 @@
 import {
   MathFloor,
   getRandomInt,
-  is,
-  isDefined,
-  isColor,
   randomRGBA,
   deepMerge,
   curry,
+  $,
+  $new,
 } from './utilities';
+import {
+  isDefined,
+  isInteger,
+  isInTheRange,
+  isInTheBody,
+  isBoolean,
+  isNumber,
+  isFunction,
+  isObj,
+  isCanvas,
+  isGreatherThan,
+  isColor,
+} from './is';
 import Pixel from './Pixel';
 import Animation from './Animation';
 import BufferWorker from './workers/Buffer.worker';
@@ -15,28 +27,22 @@ import BufferWorker from './workers/Buffer.worker';
 const minNum = Number.MIN_SAFE_INTEGER;
 const maxNum = Number.MAX_SAFE_INTEGER;
 
-const isCanvas = is('HTMLCanvasElement');
-const isObj = is('Object');
-const isNumber = is('Number');
-const isBoolean = is('Boolean');
-const isFunction = is('Function');
-
-const isInteger = x => is('Number')(x) && parseInt(x, 10) === x;
-const isInTheRange = (min = 0, max) => x => x >= min && x <= max;
-const isGreatherThan = y => x => x > y;
 const evaluateRules = (rules, value) =>
   rules.reduce((r, check) => {
     const test = check(value);
     return r && test;
   }, true);
 
-// const minWidth = 300;
-// const minHeight = 100;
-
 const canvasWidthMinValue = 200;
 const canvasHeightMinValue = 200;
 
+const cssNamespace = 'gofl';
+
 const baseConfig = {
+  selectors: Object.freeze({
+    gofl: `.${cssNamespace}`,
+    timeFrame: `#${cssNamespace}__timeFrame`,
+  }),
   canvas: {
     width: {
       defaultValue: 800,
@@ -77,7 +83,7 @@ const baseConfig = {
       rules: [isColor],
     },
     randomColors: {
-      defaultValue: true,
+      defaultValue: false,
       rules: [isBoolean],
     },
   },
@@ -95,8 +101,15 @@ const baseConfig = {
       rules: [isBoolean],
     },
     $element: {
-      defaultValue: x => document.querySelector(x || '#goflTimeFrame'),
-      rules: [isDefined],
+      defaultValue: () => {
+        const selector = baseConfig.selectors.timeFrame;
+        let $element = $(selector);
+        if (!isDefined($element)) {
+          $element = $new('DIV');
+        }
+        return $element;
+      },
+      rules: [isInTheBody],
     },
     useSnapshots: {
       defaultValue: false,
@@ -212,14 +225,8 @@ const validateRndNumber = (length = baseConfig.randomPixels, rows, cols) => {
   return Math.floor(minPixels);
 };
 
-const createNewCanvas = () => {
-  const $canvas = document.createElement('CANVAS');
-  document.body.appendChild($canvas);
-  return $canvas;
-};
-
 const initCanvas = ($element, config) => {
-  const $canvas = isCanvas($element) ? $element : createNewCanvas();
+  const $canvas = isCanvas($element) ? $element : $new('CANVAS', document.body);
   const { width, height, fullScreen } = config.canvas;
   const $canvasWidth = parseInt($canvas.getAttribute('width'), 10);
   const $canvasHeight = parseInt($canvas.getAttribute('height'), 10);
