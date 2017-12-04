@@ -150,6 +150,14 @@ export const isColor = input => isHex(input) || isRGB(input) || isHSL(input);
 export const isCanvas = is('HTMLCanvasElement');
 
 /**
+ * Checks if the argument is a String.
+ * @param {Any} x
+ *
+ * @returns {boolean} True if the argument is a String, False otherwise
+ */
+export const isString = is('String');
+
+/**
  * Checks if the argument is an Object.
  * @param {Any} x
  *
