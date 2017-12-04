@@ -334,20 +334,20 @@ const frameHelper = (anim, $canvas, config, pixels) => {
 
 const renderTimeFrame = ($element, step) => {
   const list = document.createElement('UL');
-  list.classList.add('gameOfLifeLog__list');
+  list.classList.add(`${cssNamespace}__log-list`);
   Object.keys(step).forEach(property => {
     const value = `${step[property]}`;
     const item = document.createElement('LI');
     const keyDescription = document.createElement('SPAN');
     const valDescription = document.createElement('SPAN');
 
-    item.classList.add('gameOfLifeLog__item');
-    keyDescription.classList.add('gameOfLifeLog__itemKey');
-    valDescription.classList.add('gameOfLifeLog__itemValue');
+    item.classList.add(`${cssNamespace}__log-item`);
+    keyDescription.classList.add(`${cssNamespace}__log-itemKey`);
+    valDescription.classList.add(`${cssNamespace}__log-itemValue`);
 
     if (isDefined(value.match(/data:image\//))) {
       const img = document.createElement('IMG');
-      img.classList.add('gameOfLife__snapshot');
+      img.classList.add(`${cssNamespace}__snapshot`);
       img.src = value;
       item.appendChild(img);
     } else {
