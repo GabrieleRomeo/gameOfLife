@@ -398,8 +398,6 @@ class GameOfLife {
     this.buffer = initBuffer(this.config);
 
     this.frames = [];
-    this.$timeFrame = document.querySelector('#gofTimeFrame');
-
     this.animation = new Animation(this.$canvas);
 
     // When necessary, draw the grid at startup time
