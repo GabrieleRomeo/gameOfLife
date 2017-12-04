@@ -276,7 +276,7 @@ const drawFps = (anim, fps) => {
   const context = anim.getContext();
   context.fillStyle('black');
   context.fillRect(context.canvas.width - 100, 0, 100, 30);
-  context.font('18pt Calibri');
+  context.font('13pt monospace');
   context.fillStyle('red');
   context.fillText(`fps: ${fps.toFixed(1)}`, context.canvas.width - 93, 22);
   anim.renderOnCanvas();
