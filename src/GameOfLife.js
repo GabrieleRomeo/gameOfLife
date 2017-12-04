@@ -53,6 +53,10 @@ const baseConfig = {
       defaultValue: true,
       rules: [isBoolean],
     },
+    showGridAtStartup: {
+      defaultValue: false,
+      rules: [isBoolean],
+    },
     showFps: {
       defaultValue: false,
       rules: [isBoolean],
@@ -397,6 +401,18 @@ class GameOfLife {
     this.$timeFrame = document.querySelector('#gofTimeFrame');
 
     this.animation = new Animation(this.$canvas);
+
+    // When necessary, draw the grid at startup time
+    if (this.config.canvas.showGridAtStartup === true) {
+      drawGrid(
+        this.animation,
+        this.config.canvas.cols,
+        this.config.canvas.rows,
+        this.config.pixel,
+      );
+    }
+
+    // Set the animation stage
     this.animation.setStage(function animationLoop() {
       const anim = this;
       const { showGrid, showFps, cols, rows } = self.config.canvas;
