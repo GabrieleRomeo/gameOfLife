@@ -140,3 +140,103 @@ const isHSL = input => {
  * @returns {boolean} True or False
  */
 export const isColor = input => isHex(input) || isRGB(input) || isHSL(input);
+
+/**
+ * Checks if the argument is an HTML Canvas element.
+ * @param {Any} x
+ *
+ * @returns {boolean} True if the argument is an HTML Canavas, False otherwise
+ */
+export const isCanvas = is('HTMLCanvasElement');
+
+/**
+ * Checks if the argument is an Object.
+ * @param {Any} x
+ *
+ * @returns {boolean} True if the argument is an Object, False otherwise
+ */
+export const isObj = is('Object');
+
+/**
+ * Checks if the argument is a Number.
+ * @param {Any} x
+ *
+ * @returns {boolean} True if the argument is a Number, False otherwise
+ */
+export const isNumber = is('Number');
+
+/**
+ * Checks if the argument is a Boolean.
+ * @param {Any} x
+ *
+ * @returns {boolean} True if the argument is a Boolean, False otherwise
+ */
+export const isBoolean = is('Boolean');
+
+/**
+ * Checks if the argument is a Function.
+ * @param {Any} x
+ *
+ * @returns {boolean} True if the argument is a Function, False otherwise
+ */
+export const isFunction = is('Function');
+
+/**
+ * Checks if the argument is an HTML Element.
+ * @param {Any} x
+ *
+ * @returns {boolean} True if the argument is a an HTML Element, False otherwise
+ */
+export const isHTMLElement = x => /HTML/.test(x);
+
+/**
+ * Checks if the argument is an Integer.
+ * @param {Any} x
+ *
+ * @returns {boolean} True if the argument is an Integer, False otherwise
+ */
+export const isInteger = x => is('Number')(x) && parseInt(x, 10) === x;
+
+/**
+ * Sets a numeric range (inclusive)
+ * @param {Number} min The minimum value (inclusive)
+ * @param {Number} max The maximum value (inclusive)
+ * @returns {Function} Takes an argument and checks if the argument is between
+ *                     range
+ * @param {Number} x The value under the test
+ * @returns {Boolean} True if the argument is between the range, false otherwise
+ *
+ */
+export const isInTheRange = (min = 0, max) => x => x >= min && x <= max;
+
+/**
+ * Sets a numeric range (exclusive)
+ * @param {Number} min The minimum value (exclusive)
+ * @param {Number} max The maximum value (exclusive)
+ * @returns {Function} Takes an argument and checks if the argument is between
+ *                     range
+ * @param {Number} x The value under the test
+ * @returns {Boolean} True if the argument is between the range, false otherwise
+ *
+ */
+export const isInTheRangeExcl = (min = 0, max) => x => x > min && x < max;
+
+/**
+ * Checks if an element exists in the DOM
+ * @param {HTMLNode} x
+ *
+ * @returns {boolean} True if the argument exists, False otherwise
+ */
+export const isInTheBody = x => document.body.contains(x);
+
+/**
+ * Sets a minimum value
+ * @param {Number} y The minimum value (exclusive)
+ * @returns {Function} Takes an argument and checks if the argument is greather
+ *                     than the minimum value
+ * @param {Number} x The value under the test
+ * @returns {Boolean} True if the argument is greather than the minimum value, 
+ *                    false otherwise
+ *
+ */
+export const isGreatherThan = y => x => x > y;
