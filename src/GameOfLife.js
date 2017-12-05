@@ -7,12 +7,14 @@ import {
   curry,
   $,
   $new,
+  $clone,
 } from './utilities';
 import {
   isDefined,
   isInteger,
   isInTheRange,
   isInTheBody,
+  isString,
   isBoolean,
   isNumber,
   isCanvas,
@@ -124,6 +126,16 @@ const baseConfig = {
       },
     },
   },
+  splash: {
+    showSplash: {
+      defaultValue: true,
+      rules: [isBoolean],
+    },
+    text: {
+      defaultValue: 'The Game of Life',
+      rules: [isString],
+    },
+  },
 };
 
 const bufferWorker = new BufferWorker();
@@ -201,6 +213,187 @@ const initCanvas = ($element, config) => {
   $canvas.height = finalHeight;
 
   return $canvas;
+};
+
+const getBlurValue = blur => {
+  const { userAgent } = navigator;
+  if (userAgent && userAgent.indexOf('Firefox/4') !== -1) {
+    const kernelSize = blur < 8 ? blur / 2 : Math.sqrt(blur * 2);
+    const blurRadius = Math.ceil(kernelSize);
+    return blurRadius * 2;
+  }
+  return blur;
+};
+
+const createInterlace = (size, color1, color2) => {
+  const proto = $new('canvas').getContext('2d');
+  proto.canvas.width = size * 2;
+  proto.canvas.height = size * 2;
+  proto.fillStyle = color1; // top-left
+  proto.fillRect(0, 0, size, size);
+  proto.fillStyle = color2; // top-right
+  proto.fillRect(size, 0, size, size);
+  proto.fillStyle = color2; // bottom-left
+  proto.fillRect(0, size, size, size);
+  proto.fillStyle = color1; // bottom-right
+  proto.fillRect(size, size, size, size);
+  const pattern = proto.createPattern(proto.canvas, 'repeat');
+  pattern.data = proto.canvas.toDataURL();
+  return pattern;
+};
+
+const getMetrics = (text, font) => {
+  const op8x8 = createInterlace(8, '#FFF', '#eee');
+  const image = $new('IMG');
+  image.width = 42;
+  image.height = 1;
+  image.src = op8x8.data;
+  image.style.cssText = 'display: inline';
+  let metrics = $('#metrics');
+  const parent = isDefined(metrics) ? metrics.firstChild : $new('SPAN');
+  if (isDefined(metrics)) {
+    metrics.style.cssText = 'display: block';
+    parent.firstChild.textContent = text;
+  } else {
+    // setting up html used for measuring text-metrics
+    parent.appendChild(document.createTextNode(text));
+    parent.appendChild(image);
+    metrics = $new('div');
+    metrics.id = 'metrics';
+    metrics.appendChild(parent);
+    document.body.insertBefore(metrics, document.body.firstChild);
+  }
+
+  // direction of the text
+  const { direction } = window.getComputedStyle(document.body, '');
+
+  // getting css equivalent of ctx.measureText()
+  parent.style.cssText = `font:${font}; white-space: nowrap; display: inline;`;
+
+  const width = parent.offsetWidth;
+  const height = parent.offsetHeight;
+
+  // capturing the "top" and "bottom" baseline
+  parent.style.cssText = `font:${font}; white-space: nowrap; display: block;`;
+  const top = image.offsetTop;
+  const bottom = top - height;
+
+  // capturing the "middle" baseline
+  parent.style.cssText = `font:${font};
+                          white-space: nowrap;
+                          line-height: 0;
+                          display: block;`;
+  const middle = image.offsetTop + 1;
+
+  // capturing "1em"
+  parent.style.cssText = `font:${font}; white-space: nowrap; height: 1em;
+  display: block;`;
+  parent.firstChild.textContent = '';
+  const em = parent.offsetHeight;
+
+  // cleanup
+  metrics.style.display = 'none';
+
+  return {
+    direction,
+    top,
+    em,
+    middle,
+    bottom,
+    height,
+    width,
+  };
+};
+
+function neonLightEffect($canvas, text) {
+  const ctx = $canvas.getContext('2d');
+  const font = '90px Futura, Helvetica, sans-serif';
+  const jitter = 25; // the distance of the maximum jitter
+  let offsetX = $canvas.width / 2;
+  const offsetY = 0;
+  const blur = getBlurValue(100);
+  // save state
+  ctx.save();
+  ctx.font = font;
+
+  // calculate width + height of text-block
+  const metrics = getMetrics(text, font);
+
+  offsetX -= metrics.width / 2;
+  // create clipping mask around text-effect
+  ctx.rect(
+    offsetX - blur / 2,
+    offsetY - blur / 2,
+    offsetX + metrics.width + blur,
+    metrics.height + blur,
+  );
+  ctx.clip();
+  // create shadow-blur to mask rainbow onto
+  // (since shadowColor doesn't accept gradients)
+  ctx.save();
+  ctx.fillStyle = '#fff';
+  ctx.shadowColor = 'rgba(0,0,0,1)';
+  ctx.shadowOffsetX = metrics.width + blur;
+  ctx.shadowOffsetY = 0;
+  ctx.shadowBlur = blur;
+  ctx.fillText(text, -metrics.width + offsetX - blur, offsetY + metrics.top);
+  ctx.restore();
+  // create the rainbow linear-gradient
+  const gradient = ctx.createLinearGradient(0, 0, metrics.width, 0);
+  gradient.addColorStop(0, 'rgba(255, 0, 0, 1)');
+  gradient.addColorStop(0.15, 'rgba(255, 255, 0, 1)');
+  gradient.addColorStop(0.3, 'rgba(0, 255, 0, 1)');
+  gradient.addColorStop(0.5, 'rgba(0, 255, 255, 1)');
+  gradient.addColorStop(0.65, 'rgba(0, 0, 255, 1)');
+  gradient.addColorStop(0.8, 'rgba(255, 0, 255, 1)');
+  gradient.addColorStop(1, 'rgba(255, 0, 0, 1)');
+  // change composite so source is applied within the shadow-blur
+  ctx.globalCompositeOperation = 'source-atop';
+  // apply gradient to shadow-blur
+  ctx.fillStyle = gradient;
+  ctx.fillRect(
+    offsetX - jitter - 30,
+    offsetY,
+    metrics.width + offsetX + 100,
+    metrics.height + offsetY + 100,
+  );
+  // change composite to mix as light
+  ctx.globalCompositeOperation = 'lighter';
+  // multiply the layer
+  ctx.globalAlpha = 0.7;
+  ctx.drawImage(ctx.canvas, 0, 0);
+  ctx.drawImage(ctx.canvas, 0, 0);
+  ctx.globalAlpha = 1;
+  // draw white-text ontop of glow
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  ctx.fillText(text, offsetX, offsetY + metrics.top);
+  // created jittered stroke
+  ctx.lineWidth = 0.8;
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  let i = 10;
+
+  // eslint-disable-next-line no-cond-assign
+  while ((i -= 1)) {
+    const left = jitter / 2 - Math.random() * jitter;
+    const top = jitter / 2 - Math.random() * jitter;
+    ctx.strokeText(text, left + offsetX, top + offsetY + metrics.top);
+  }
+  ctx.strokeStyle = 'rgba(0,0,0,0.20)';
+  ctx.strokeText(text, offsetX, offsetY + metrics.top);
+  ctx.restore();
+}
+
+const initSplash = ($splash, $canvas, text) => {
+  const parent = $canvas.parentNode;
+  const container = $new('DIV', parent);
+
+  container.setAttribute('style', 'position:relative');
+  $canvas.setAttribute('style', 'z-index:0');
+  $splash.setAttribute('style', 'position:absolute;top:0;z-index:10');
+  container.appendChild($splash);
+  container.appendChild($canvas);
+
+  neonLightEffect($splash, text);
 };
 
 const initColsRows = ctx => {
@@ -393,12 +586,17 @@ class GameOfLife {
     this.pixels = [];
     this.config = validateConfig(baseConfig, config);
     this.$canvas = initCanvas($canvas, this.config);
+    this.$splash = $clone(this.$canvas, 'gofl__splash');
 
     this.config = initColsRows(this);
     this.buffer = initBuffer(this.config);
 
     this.frames = [];
     this.animation = new Animation(this.$canvas);
+
+    if (this.config.splash.showSplash === true) {
+      initSplash(this.$splash, this.$canvas, this.config.splash.text);
+    }
 
     // When necessary, draw the grid at startup time
     if (this.config.canvas.showGridAtStartup === true) {
