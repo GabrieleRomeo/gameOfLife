@@ -1,7 +1,10 @@
-import { type, isDefined } from './is';
+import { type, isDefined, isHTMLElement } from './is';
 
-const MathFloor = Math.floor;
-const MathRnd = Math.random;
+export const MathFloor = Math.floor;
+export const MathRnd = Math.random;
+
+export const minNum = Number.MIN_SAFE_INTEGER;
+export const maxNum = Number.MAX_SAFE_INTEGER;
 
 /**
   * Take a function and returns another function which takes a list of arguments
@@ -109,7 +112,7 @@ export const evaluate = pred => (d, a) => (pred(d) ? d : a);
  */
 export const flatten = (obj, name, stem) => {
   let out = {};
-  const isObj = is('Object');
+  const isObj = x => type(x) === 'Object';
   const newStem = isDefined(stem) ? `${stem}_${name}` : name;
 
   if (!isObj(obj)) {
@@ -168,3 +171,35 @@ export const randomRGBA = () => {
  * @return     {HTMLNode} [ctx] An optional parent context
  */
 export const $ = (selector, ctx = document.body) => ctx.querySelector(selector);
+
+/**
+ * Create a new HTML element and append it to a parent
+ * @param {string} name The name of the HTML element
+ * @param {HTMLNode} [parent] An optional parent element
+ *
+ * @returns {HTMLNode} The new HTML element
+ */
+export const $new = (name, parent) => {
+  const $element = document.createElement(name);
+  if (isHTMLElement(parent)) {
+    parent.appendChild($element);
+  }
+  return $element;
+};
+
+/**
+ * Clone an HTML element
+ * @param {HTMLNode} node An HTML node to be cloned
+ * @param {Boolean} [deep]
+ * @param {String} [newId] The Id of the cloned HTML element
+ *
+ * @returns {HTMLNode} The cloned HTML element
+ */
+export const $clone = (node, newId = '', deep = true) => {
+  if (isHTMLElement(node)) {
+    const element = node.cloneNode(deep);
+    element.id = newId;
+    return element;
+  }
+  return null;
+};
