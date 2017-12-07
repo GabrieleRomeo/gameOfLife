@@ -135,6 +135,16 @@ const baseConfig = {
       defaultValue: 'The Game of Life',
       rules: [isString],
     },
+    useMusicEffect: {
+      defaultValue: true,
+      rules: [isBoolean],
+    },
+    musicEffect: {
+      path: {
+        defaultValue: 'public/light-bulb.wav',
+        rules: [isString],
+      },
+    },
   },
 };
 
@@ -307,10 +317,12 @@ const getMetrics = (text, font) => {
 
 function neonLightEffect($canvas, text) {
   const ctx = $canvas.getContext('2d');
-  const font = '90px Futura, Helvetica, sans-serif';
+  const cnvW = $canvas.width;
+  const cnvH = $canvas.height;
+  const font = '70px "Holtwood One SC", Futura, Helvetica, sans-serif';
   const jitter = 25; // the distance of the maximum jitter
-  let offsetX = $canvas.width / 2;
-  const offsetY = 0;
+  let offsetX = cnvW / 2;
+  let offsetY = cnvH / 2;
   const blur = getBlurValue(100);
   // save state
   ctx.save();
@@ -320,6 +332,7 @@ function neonLightEffect($canvas, text) {
   const metrics = getMetrics(text, font);
 
   offsetX -= metrics.width / 2;
+  offsetY -= metrics.height;
   // create clipping mask around text-effect
   ctx.rect(
     offsetX - blur / 2,
@@ -353,7 +366,7 @@ function neonLightEffect($canvas, text) {
   ctx.fillStyle = gradient;
   ctx.fillRect(
     offsetX - jitter - 30,
-    offsetY,
+    offsetY - 30,
     metrics.width + offsetX + 100,
     metrics.height + offsetY + 100,
   );
@@ -383,13 +396,24 @@ function neonLightEffect($canvas, text) {
   ctx.restore();
 }
 
-const initSplash = ($splash, $canvas, text) => {
+const initSplash = ($splash, $canvas, config) => {
+  const { text, useMusicEffect, musicEffect } = config.splash;
   const parent = $canvas.parentNode;
   const container = $new('DIV', parent);
 
   container.setAttribute('style', 'position:relative');
   $canvas.setAttribute('style', 'z-index:0');
   $splash.setAttribute('style', 'position:absolute;top:0;z-index:10');
+  $splash.classList.add(`${cssNamespace}__animation`);
+
+  // When necessary, use the music effect
+  if (useMusicEffect === true) {
+    const audio = $new('AUDIO', document.body);
+    const source = $new('SOURCE', audio);
+    audio.setAttribute('autoplay', '');
+    source.setAttribute('src', `${musicEffect.path}`);
+  }
+
   container.appendChild($splash);
   container.appendChild($canvas);
 
@@ -429,7 +453,8 @@ const initBuffer = config => {
 const drawGrid = (anim, cols, rows, pixelConfig) => {
   const context = anim.getContext();
   const minY = 0;
-  const maxY = cols * pixelConfig.height;
+  const maxYrows = cols * pixelConfig.height;
+  const maxYcols = rows * pixelConfig.height;
   const minX = 0;
   const iStrokeWidth = 1;
   const iTranslate = (iStrokeWidth % 2) / 2;
@@ -441,7 +466,7 @@ const drawGrid = (anim, cols, rows, pixelConfig) => {
     context.beginPath();
     context.strokeStyle('rgba(0, 0, 0, 1)');
     context.moveTo(minX, r * pixelConfig.height);
-    context.lineTo(maxY, r * pixelConfig.height);
+    context.lineTo(maxYrows, r * pixelConfig.height);
     context.lineWidth(iStrokeWidth);
     context.stroke();
     context.restore();
@@ -457,7 +482,7 @@ const drawGrid = (anim, cols, rows, pixelConfig) => {
     context.beginPath();
     context.strokeStyle('rgba(0, 0, 0, 1)');
     context.moveTo(c * pixelConfig.width, minY);
-    context.lineTo(c * pixelConfig.height, maxY);
+    context.lineTo(c * pixelConfig.height, maxYcols);
     context.lineWidth(iStrokeWidth);
     context.stroke();
     context.restore();
@@ -595,7 +620,7 @@ class GameOfLife {
     this.animation = new Animation(this.$canvas);
 
     if (this.config.splash.showSplash === true) {
-      initSplash(this.$splash, this.$canvas, this.config.splash.text);
+      initSplash(this.$splash, this.$canvas, this.config);
     }
 
     // When necessary, draw the grid at startup time
