@@ -8,6 +8,7 @@ import {
   $,
   $new,
   $clone,
+  gcss,
 } from './utilities';
 import {
   isDefined,
@@ -134,6 +135,14 @@ const baseConfig = {
     text: {
       defaultValue: 'The Game of Life',
       rules: [isString],
+    },
+    fontFamily: {
+      defaultValue: '"Holtwood One SC", Futura, Helvetica, sans-serif',
+      rules: [isString],
+    },
+    fontSize: {
+      defaultValue: 70,
+      rules: [isInteger],
     },
     useMusicEffect: {
       defaultValue: true,
@@ -315,30 +324,47 @@ const getMetrics = (text, font) => {
   };
 };
 
-function neonLightEffect($canvas, text) {
+function neonLightEffect($canvas, text, config) {
+  const { fontFamily, fontSize } = config.splash;
+  const $canvasCSS = gcss($canvas);
+  const $canvasBorder = Number.parseInt($canvasCSS('border-width'), 10) || 0;
+  const $canvasPadding = Number.parseInt($canvasCSS('padding-width'), 10) || 0;
+  const minRatio = 1.5;
   const ctx = $canvas.getContext('2d');
-  const cnvW = $canvas.width;
-  const cnvH = $canvas.height;
-  const font = '70px "Holtwood One SC", Futura, Helvetica, sans-serif';
+  const cnvWidth = $canvas.width;
+  const cnvHeight = $canvas.height;
+  let font = `${fontSize}px ${fontFamily}`;
   const jitter = 25; // the distance of the maximum jitter
-  let offsetX = cnvW / 2;
-  let offsetY = cnvH / 2;
+  let offsetX = cnvWidth / 2;
+  let offsetY = cnvHeight / 2;
   const blur = getBlurValue(100);
+
+  // calculate width + height of text-block
+  let metrics = getMetrics(text, font);
+  const { width: fontWidth } = metrics;
+  const textRatio = cnvWidth / fontWidth;
+
+  // The the splash's text ratio must be equal or greater than the minRatio
+  if (textRatio < minRatio) {
+    font = `${fontSize * textRatio / minRatio}px ${fontFamily}`;
+    metrics = getMetrics(text, font);
+  }
+
+  offsetX -= metrics.width / 2 - $canvasBorder - $canvasPadding;
+  offsetY -= metrics.height - $canvasBorder - $canvasPadding;
+
+  const metricsY = offsetY + metrics.top;
+
   // save state
   ctx.save();
   ctx.font = font;
 
-  // calculate width + height of text-block
-  const metrics = getMetrics(text, font);
-
-  offsetX -= metrics.width / 2;
-  offsetY -= metrics.height;
   // create clipping mask around text-effect
   ctx.rect(
     offsetX - blur / 2,
-    offsetY - blur / 2,
+    offsetY - blur - jitter,
     offsetX + metrics.width + blur,
-    metrics.height + blur,
+    metrics.height + blur + jitter + 20,
   );
   ctx.clip();
   // create shadow-blur to mask rainbow onto
@@ -349,10 +375,15 @@ function neonLightEffect($canvas, text) {
   ctx.shadowOffsetX = metrics.width + blur;
   ctx.shadowOffsetY = 0;
   ctx.shadowBlur = blur;
-  ctx.fillText(text, -metrics.width + offsetX - blur, offsetY + metrics.top);
+  ctx.fillText(text, -metrics.width + offsetX - blur, metricsY);
   ctx.restore();
   // create the rainbow linear-gradient
-  const gradient = ctx.createLinearGradient(0, 0, metrics.width, 0);
+  const gradient = ctx.createLinearGradient(
+    0,
+    0,
+    metrics.width + offsetX - blur,
+    0,
+  );
   gradient.addColorStop(0, 'rgba(255, 0, 0, 1)');
   gradient.addColorStop(0.15, 'rgba(255, 255, 0, 1)');
   gradient.addColorStop(0.3, 'rgba(0, 255, 0, 1)');
@@ -366,9 +397,9 @@ function neonLightEffect($canvas, text) {
   ctx.fillStyle = gradient;
   ctx.fillRect(
     offsetX - jitter - 30,
-    offsetY - 30,
-    metrics.width + offsetX + 100,
-    metrics.height + offsetY + 100,
+    offsetY - jitter - blur,
+    metrics.width + offsetX + 120,
+    metrics.height + offsetY + jitter,
   );
   // change composite to mix as light
   ctx.globalCompositeOperation = 'lighter';
@@ -379,7 +410,7 @@ function neonLightEffect($canvas, text) {
   ctx.globalAlpha = 1;
   // draw white-text ontop of glow
   ctx.fillStyle = 'rgba(255,255,255,0.95)';
-  ctx.fillText(text, offsetX, offsetY + metrics.top);
+  ctx.fillText(text, offsetX, metricsY);
   // created jittered stroke
   ctx.lineWidth = 0.8;
   ctx.strokeStyle = 'rgba(255,255,255,0.25)';
@@ -389,10 +420,10 @@ function neonLightEffect($canvas, text) {
   while ((i -= 1)) {
     const left = jitter / 2 - Math.random() * jitter;
     const top = jitter / 2 - Math.random() * jitter;
-    ctx.strokeText(text, left + offsetX, top + offsetY + metrics.top);
+    ctx.strokeText(text, left + offsetX, top + metricsY);
   }
   ctx.strokeStyle = 'rgba(0,0,0,0.20)';
-  ctx.strokeText(text, offsetX, offsetY + metrics.top);
+  ctx.strokeText(text, offsetX, metricsY);
   ctx.restore();
 }
 
@@ -417,7 +448,7 @@ const initSplash = ($splash, $canvas, config) => {
   container.appendChild($splash);
   container.appendChild($canvas);
 
-  neonLightEffect($splash, text);
+  neonLightEffect($splash, text, config);
 };
 
 const initColsRows = ctx => {
