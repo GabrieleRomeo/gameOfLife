@@ -8,6 +8,7 @@ import {
   $,
   $new,
   $clone,
+  $css,
   gcss,
 } from './utilities';
 import {
@@ -324,7 +325,7 @@ const getMetrics = (text, font) => {
   };
 };
 
-function neonLightEffect($canvas, text, config) {
+const neonLightEffect = ($canvas, text, config) => {
   const { fontFamily, fontSize } = config.splash;
   const $canvasCSS = gcss($canvas);
   const $canvasBorder = Number.parseInt($canvasCSS('border-width'), 10) || 0;
@@ -425,7 +426,7 @@ function neonLightEffect($canvas, text, config) {
   ctx.strokeStyle = 'rgba(0,0,0,0.20)';
   ctx.strokeText(text, offsetX, metricsY);
   ctx.restore();
-}
+};
 
 const initSplash = ($splash, $canvas, config) => {
   const { text, useMusicEffect, musicEffect } = config.splash;
@@ -643,6 +644,7 @@ class GameOfLife {
     this.config = validateConfig(baseConfig, config);
     this.$canvas = initCanvas($canvas, this.config);
     this.$splash = $clone(this.$canvas, 'gofl__splash');
+    this.$splashCSS = $css(this.$splash);
 
     this.config = initColsRows(this);
     this.buffer = initBuffer(this.config);
@@ -716,16 +718,28 @@ class GameOfLife {
   start() {
     // if the animation is not started yet
     if (this.animation.isAnimating() === false) {
+      // hide the splash canvas by removing its animation class and by setting
+      // its opacity to zero
+      this.$splash.classList.remove(`${cssNamespace}__animation`);
+      this.$splashCSS('opacity', 0);
       drawPixels(this.animation, this.buffer.pixels, this.config);
       handleTimeFrame(this, this.buffer.pixels);
       this.animation.start();
     }
   }
   pause() {
-    this.animation.stop();
+    if (this.animation.isAnimating() === true) {
+      // show the splash canvas
+      this.$splashCSS('opacity', 0.4);
+      this.animation.stop();
+    }
   }
   resume() {
-    this.animation.start();
+    if (this.animation.isAnimating() === false) {
+      // hide the splash canvas
+      this.$splashCSS('opacity', 0);
+      this.animation.start();
+    }
   }
   stop() {
     this.animation.stop();
