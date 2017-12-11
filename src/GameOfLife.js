@@ -577,7 +577,8 @@ const frameHelper = (anim, $canvas, config, pixels) => {
     time: anim.getTime(),
     number_of_Cells: pixels.length,
   };
-  const { scale, quality, useSnapshots } = config.timeFrame;
+  const { useSnapshots } = config.timeFrame;
+  const { scale, quality } = config.timeFrame.snapshots;
 
   if (useSnapshots === true) {
     frame.dataURL = takeSnapshot($canvas, scale, quality);
@@ -743,6 +744,9 @@ class GameOfLife {
   }
   stop() {
     this.animation.stop();
+  }
+  setRecordFrame(value) {
+    this.config.timeFrame.record = value;
   }
 }
 
