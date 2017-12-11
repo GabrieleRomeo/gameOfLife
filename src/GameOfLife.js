@@ -731,7 +731,7 @@ class GameOfLife {
   pause() {
     if (this.animation.isAnimating() === true) {
       // show the splash canvas
-      this.$splashCSS('opacity', 0.4);
+      this.$splashCSS('opacity', 0.1);
       this.animation.stop();
     }
   }
