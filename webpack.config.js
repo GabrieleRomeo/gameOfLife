@@ -1,11 +1,13 @@
 const path = require('path');
 
+const { resolve } = path;
+
 const isProduction = process.env.NODE_ENV === 'production';
 const FILENAME = 'bundle';
 
 const config = {
   context: __dirname,
-  entry: path.join(__dirname, 'src/index.js'),
+  entry: path.join(__dirname, 'src/GameOfLife.js'),
   devtool: 'cheap-eval-source-map',
   output: {
     path: path.join(__dirname, 'build/'),
@@ -32,9 +34,9 @@ const config = {
       ~~~~   UMD ~~~~~
       Uncomment the following properties
     */
-    // library: 'LibraryName',
-    // libraryTarget: 'umd',
-    // umdNamedDefine: true,
+    library: 'gameOfLife',
+    libraryTarget: 'umd',
+    umdNamedDefine: true,
     /*
       Then add the bundle script to your webpage and use it
       <script src="dist/bundle.min.js"></script>
@@ -44,7 +46,7 @@ const config = {
     */
   },
   devServer: {
-    publicPath: '/public/',
+    publicPath: './',
   },
   resolve: {
     extensions: ['.js', '.json'],
@@ -65,6 +67,19 @@ const config = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
+        include: [resolve(__dirname, 'src'), resolve(__dirname, 'test')],
+        rules: [
+          {
+            test: /\.worker\.js$/,
+            loader: 'worker-loader',
+            enforce: 'post',
+            include: [resolve(__dirname, 'src'), resolve(__dirname, 'test')],
+            options: {
+              publicPath: './build/',
+              name: 'buffer.worker.[hash].js',
+            },
+          },
+        ],
       },
     ],
   },
