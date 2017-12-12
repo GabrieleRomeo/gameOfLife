@@ -2,3 +2,4 @@ node_modules
 __coverage__
 __jsDoc__
 build/buffer*
+build/bundle.js
