@@ -203,3 +203,31 @@ export const $clone = (node, newId = '', deep = true) => {
   }
   return null;
 };
+
+/**
+ * Get the computed css style for an HTML element
+ *
+ * @param      {HTMLNode}  $e    The HTML element you want to inspect
+ * @return    {Function}  A function which takes the name of a CSS property
+ * @param      {STRING}  property    The name of the CSS property
+ * @return     {Any}    The computed CSS property
+ */
+export const gcss = $e => property =>
+  window.getComputedStyle($e, null).getPropertyValue(property);
+
+/**
+ * Set HTML Style for a specific element
+ *
+ * @param      {HTMLNode}  $e    The HTML element you want to set
+ * @return    {Function}  A function which takes the name of a CSS property and
+ *                        its value
+ * @param      {STRING}  property    The name of the CSS property
+ * @param      {STRING}  value    The value of the property
+ * @return     {void 0}
+ */
+export const $css = $e => (property, value) =>
+  (function $innerCss() {
+    // eslint-disable-next-line no-param-reassign
+    $e.style[property] = value;
+    return undefined;
+  })();
