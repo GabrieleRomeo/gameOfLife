@@ -616,9 +616,11 @@ const renderTimeFrame = ($element, step) => {
     }
 
     // Append the item to the list
-    list.appendChild(item);
+    list.insertBefore(item, list.firstChild);
   });
-  window.requestAnimationFrame(() => $element.appendChild(list));
+  window.requestAnimationFrame(() =>
+    $element.insertBefore(list, $element.firstChild),
+  );
 };
 
 const handleTimeFrame = (ctx, pixels) => {
