@@ -3,8 +3,93 @@
 <head>
   <meta charset="UTF-8">
   <title>Document</title>
+  <link href="https://use.fontawesome.com/118670e9e2.css" media="all" rel="stylesheet">
+  <link href="//fonts.googleapis.com/css?family=Francois+One%7CHoltwood+One+SC&subset=latin" rel="stylesheet">
+  <link rel="stylesheet" href="public/style.css">
+  <link rel="stylesheet" href="public/switch.css">
 </head>
 <body>
-  
+  <section class="gofl">
+    <article class="gofl__top">
+        <section>
+          <canvas id="gofl__canvas" class="gofl__canvas"></canvas>
+        </section>
+        <section>
+          <a href="#" class="gofl__button gofl__button--info" id="start">
+            <span class="gofl__text">Start</span>
+          </a>
+          <a href="#" class="gofl__button" id="stop">
+            <span class="gofl__text">Stop</span>
+          </a>
+          <div class="switch">
+            <span class="description">Record Frames</span>
+            <input id="switchTimeFrames" type="checkbox" name="toggle">
+            <label for="toggle"><i></i></label>
+            <span></span>
+          </div>
+        </section>
+        <section>
+          <div class="gofl__timeFrame" id="gofl__timeFrame">
+          </div>
+        </section>
+    </article>
+    <footer>
+      &copy; 2017 - Romeo Gabriele
+      for <a class="footer__link"
+             title="Bov Academy"
+             href="https://bovacademy.com">Bov Academy</a> with
+            <i class="footer__icon fa fa-heartbeat" aria-hidden="true"></i>
+    </footer>
+  </section>
+  <script src="build/bundle.min.js"></script>
+  <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var startBtn = document.querySelector('#start');
+        var stopBtn = document.querySelector('#stop');
+        var switchTF = document.querySelector('#switchTimeFrames');
+        var canvas = document.querySelector('#gofl__canvas');
+        var game = new gameOfLife.default(canvas, {
+          randomPixels: 4500,
+          canvas: {
+            width: 1000,
+            height: 450,
+            showFps: false,
+            showGridAtStartup: true,
+          },
+          pixel: {
+            width: 10,
+            height: 10,
+            bgcolor: 'rgb(255, 255, 255)'
+          },
+          timeFrame: {
+            show: true,
+            useSnapshots: true,
+            snapshots: {
+              scale: 0.6
+            }
+          },
+          splash: {
+            useMusicEffect:true
+          }
+        });
+
+        switchTF.addEventListener('change', function(event) {
+          game.setRecordFrame(this.checked);
+        })
+
+        startBtn.addEventListener('click', function(event) {
+          event.preventDefault();
+          game.start();
+        });
+
+        stopBtn.addEventListener('click', function(event) {
+          event.preventDefault();
+          game.stop();
+          startBtn.classList.remove('gofl__button--warn');
+          startBtn.classList.add('gofl__button--info');
+          startBtn.firstElementChild.textContent = 'Start';
+        });
+      })
+  </script>
 </body>
 </html>
