@@ -118,7 +118,7 @@ class Animation {
     this.timeInterval = time - this.lastTime;
     this.t += this.timeInterval;
 
-    if (this.stage !== undefined) {
+    if (this.stage !== undefined && this.animating === true) {
       this.stage();
     }
 
