@@ -626,9 +626,17 @@ const handleTimeFrame = (ctx, pixels) => {
   const { $element: $timeFrame } = config.timeFrame;
   const createFrame = curry(frameHelper)(animation, $canvas, config);
   const { record: recordFrames, show: showTimeFrame } = config.timeFrame;
+  const lastFrame = frames[frames.length - 1];
   // When necessary, record frames and render them
   if (recordFrames === true) {
     const frame = createFrame(pixels);
+    // When the current frame is equal to the last one, simply skip
+    if (
+      isDefined(lastFrame) &&
+      frame.frame__number === lastFrame.frame__number
+    ) {
+      return;
+    }
     if (showTimeFrame === true) {
       renderTimeFrame($timeFrame, frame);
     }
