@@ -11,14 +11,32 @@ class Context {
     const methods = {
       save: () => this.ctx.save(),
       restore: () => this.ctx.restore(),
+      beginPath: () => this.ctx.beginPath(),
+      drawImage: (image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) => {
+        this.ctx.drawImage(
+          image,
+          sx,
+          sy,
+          sWidth,
+          sHeight,
+          dx,
+          dy,
+          dWidth,
+          dHeight,
+        );
+      },
       fill: () => this.ctx.fill(),
       fillStyle: style => {
         this.ctx.fillStyle = style;
+      },
+      strokeStyle: style => {
+        this.ctx.strokeStyle = style;
       },
       font: style => {
         this.ctx.font = style;
       },
       lineTo: (x, y) => this.ctx.lineTo(x, y),
+      translate: (x, y) => this.ctx.translate(x, y),
       lineWidth: width => {
         this.ctx.lineWith = width;
       },
