@@ -357,16 +357,17 @@ const drawPixels = (anim, pixels, config) => {
 };
 
 const takeSnapshot = ($canvas, scale = 1, quality = 0.9) => {
-  // const pixelRatio = window.devicePixelRatio || 1;
   const canvasCopy = document.createElement('CANVAS');
   const ctxCopy = canvasCopy.getContext('2d');
   const { height, width } = $canvas;
+  const scaledWidth = scale * width;
+  const scaledHeight = scale * height;
 
-  canvasCopy.width = scale * width;
-  canvasCopy.height = scale * height;
+  canvasCopy.width = scaledWidth;
+  canvasCopy.height = scaledHeight;
 
-  canvasCopy.style.width = `${scale * width}px`;
-  canvasCopy.style.height = `${scale * height}px`;
+  canvasCopy.style.width = `${scaledWidth}px`;
+  canvasCopy.style.height = `${scaledHeight}px`;
 
   ctxCopy.mozImageSmoothingEnabled = false;
   ctxCopy.imageSmoothingEnabled = false;
@@ -394,7 +395,7 @@ const frameHelper = (anim, $canvas, config, pixels) => {
   return frame;
 };
 
-const renderTimeFrame = ($element, step) => {
+const renderTimeFrame = step => {
   const list = document.createElement('UL');
   list.classList.add(`${cssNamespace}__log-list`);
   Object.keys(step).forEach(property => {
@@ -425,14 +426,11 @@ const renderTimeFrame = ($element, step) => {
     // Append the item to the list
     list.insertBefore(item, list.firstChild);
   });
-  window.requestAnimationFrame(() =>
-    $element.insertBefore(list, $element.firstChild),
-  );
+  return list;
 };
 
 const handleTimeFrame = (ctx, pixels) => {
-  const { animation, $canvas, config, frames } = ctx;
-  const { $element: $timeFrame } = config.timeFrame;
+  const { animation, $canvas, config, frames, timeFrame } = ctx;
   const createFrame = curry(frameHelper)(animation, $canvas, config);
   const { record: recordFrames, show: showTimeFrame } = config.timeFrame;
   const lastFrame = frames[frames.length - 1];
@@ -447,7 +445,7 @@ const handleTimeFrame = (ctx, pixels) => {
       return;
     }
     if (showTimeFrame === true) {
-      renderTimeFrame($timeFrame, frame);
+      timeFrame.prepend(renderTimeFrame(frame), timeFrame.firstElementChild);
     }
     frames.push(frame);
   }
@@ -468,6 +466,7 @@ class GameOfLife {
     this.buffer = initBuffer(this.config);
 
     this.frames = [];
+    this.timeFrame = document.createDocumentFragment();
     this.animation = new Animation(this.$canvas);
 
     if (this.config.splash.showSplash === true) {
@@ -560,7 +559,14 @@ class GameOfLife {
     }
   }
   stop() {
-    this.animation.stop();
+    if (this.animation.isAnimating() === false) {
+      const { $element: $timeFrame } = this.config.timeFrame;
+      $timeFrame.innerHTML = '';
+      window.requestAnimationFrame(() =>
+        $timeFrame.appendChild(this.timeFrame),
+      );
+      this.animation.stop();
+    }
   }
   setRecordFrame(value) {
     this.config.timeFrame.record = value;
