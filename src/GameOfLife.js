@@ -559,7 +559,7 @@ class GameOfLife {
     }
   }
   stop() {
-    if (this.animation.isAnimating() === false) {
+    if (this.animation.isAnimating() === true) {
       const { $element: $timeFrame } = this.config.timeFrame;
       $timeFrame.innerHTML = '';
       window.requestAnimationFrame(() =>
