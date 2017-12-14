@@ -357,7 +357,7 @@ const drawPixels = (anim, pixels, config) => {
 };
 
 const takeSnapshot = ($canvas, scale = 1, quality = 0.9) => {
-  const canvasCopy = document.createElement('CANVAS');
+  const canvasCopy = $new('CANVAS');
   const ctxCopy = canvasCopy.getContext('2d');
   const { height, width } = $canvas;
   const scaledWidth = scale * width;
@@ -396,20 +396,20 @@ const frameHelper = (anim, $canvas, config, pixels) => {
 };
 
 const renderTimeFrame = step => {
-  const list = document.createElement('UL');
+  const list = $new('UL');
   list.classList.add(`${cssNamespace}__log-list`);
   Object.keys(step).forEach(property => {
     const value = `${step[property]}`;
-    const item = document.createElement('LI');
-    const keyDescription = document.createElement('SPAN');
-    const valDescription = document.createElement('SPAN');
+    const item = $new('LI');
+    const keyDescription = $new('SPAN');
+    const valDescription = $new('SPAN');
 
     item.classList.add(`${cssNamespace}__log-item`);
     keyDescription.classList.add(`${cssNamespace}__log-itemKey`);
     valDescription.classList.add(`${cssNamespace}__log-itemValue`);
 
     if (isDefined(value.match(/data:image\//))) {
-      const img = document.createElement('IMG');
+      const img = $new('IMG');
       img.classList.add(`${cssNamespace}__snapshot`);
       img.src = value;
       item.appendChild(img);
