@@ -391,7 +391,7 @@ const drawGrid = (anim, cols, rows, pixelConfig) => {
 };
 
 /**
- * Draws fps on a Canavas
+ * Draws fps on a Canvas
  *
  * @param      {Object}  anim    The animation Object
  * @param      {(number|string)}  fps     The fps value
@@ -471,6 +471,16 @@ const takeSnapshot = ($canvas, scale = 1, quality = 0.9) => {
   return newImg;
 };
 
+/**
+ * An Helper function which is used to define the items that are used to compose
+ * the timeFrame HTML element
+ *
+ * @param      {Object}  anim     The animation Object
+ * @param      {HTMLCanavasElement}  $canvas  The canvas element
+ * @param      {Object}  config   The configuration Object
+ * @param      {Object}  pixels   The pixels Object
+ * @return     {Object}  An Object containing an HTML list and a Frame Object
+ */
 const frameHelper = (anim, $canvas, config, pixels) => {
   // Define the frame Object
   const frame = {
