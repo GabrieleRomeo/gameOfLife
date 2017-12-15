@@ -390,6 +390,13 @@ const drawGrid = (anim, cols, rows, pixelConfig) => {
   anim.renderOnCanvas();
 };
 
+/**
+ * Draws fps on a Canavas
+ *
+ * @param      {Object}  anim    The animation Object
+ * @param      {[number|string]}  fps     The fps value
+ * @return     {Void 0}
+ */
 const drawFps = (anim, fps) => {
   const context = anim.getContext();
   context.fillStyle('black');
