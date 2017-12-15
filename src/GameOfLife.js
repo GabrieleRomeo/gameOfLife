@@ -292,6 +292,14 @@ const initSplash = ($splash, $canvas, config) => {
   neonLightEffect($splash, text, config);
 };
 
+/**
+ * Calculates the number of cols and rows the canvas contains and add the
+ * information to the main confing object
+ *
+ * @param      {Object}    ctx     The gameOfLife context
+ * @return     {Object}  An augmented copy of the config object containing the
+ *                       estimated number of cols and rows
+ */
 const initColsRows = ctx => {
   const configCopy = deepMerge({}, ctx.config);
   const { $canvas } = ctx;
