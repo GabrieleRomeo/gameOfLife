@@ -48,9 +48,13 @@ The main class constructor accepts an HTMLCanvasElement and an optional config f
   * `path` - (default `public/light-bulb.wav`) - The path of a music file
 
 
+----------------
 
-Click the following link to see a [Demo](gabrieleromeo.github.io//gameOfLife/) 
 
+Click the following link to see a [Demo](https://gabrieleromeo.github.io/gameOfLife/) 
+
+
+----------------
 
 
 Copyright 2017 © Gabriele Romeo
