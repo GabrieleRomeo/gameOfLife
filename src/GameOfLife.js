@@ -576,7 +576,13 @@ const handleTimeFrame = (ctx, pixels) => {
   }
 };
 
+/** Class representing the Game of life. */
 class GameOfLife {
+  /**
+   * Create a Game of Life
+   * @param {HTMLCanvasElement} $canvas - The main canvas element
+   * @param {Object} [config] - An optional configuration object
+   */
   constructor($canvas, config) {
     const self = this;
     let fps = 0;
@@ -652,11 +658,19 @@ class GameOfLife {
     return this.canvas.toDataURL();
   }
 
+  /**
+   * Set the pixels' color to a random value
+   * @return {undefined}
+   */
   setRandomPixelColor() {
     const { randomColors } = this.config.pixel.randomColors;
     this.config.pixel.randomColors = !randomColors;
   }
 
+  /**
+   * Starts the Game
+   * @return {undefined}
+   */
   start() {
     // if the animation is not started yet
     if (this.animation.isAnimating() === false) {
@@ -669,6 +683,11 @@ class GameOfLife {
       this.animation.start();
     }
   }
+
+  /**
+   * Pauses the Game
+   * @return {undefined}
+   */
   pause() {
     if (this.animation.isAnimating() === true) {
       // show the splash canvas
@@ -676,6 +695,11 @@ class GameOfLife {
       this.animation.stop();
     }
   }
+
+  /**
+   * Resumes a paused Game
+   * @return {undefined}
+   */
   resume() {
     if (this.animation.isAnimating() === false) {
       // hide the splash canvas
@@ -683,6 +707,11 @@ class GameOfLife {
       this.animation.start();
     }
   }
+
+  /**
+   * Stops a Game
+   * @return {undefined}
+   */
   stop() {
     if (this.animation.isAnimating() === true) {
       const { $element: $timeFrame } = this.config.timeFrame;
@@ -693,6 +722,13 @@ class GameOfLife {
       this.animation.stop();
     }
   }
+
+  /**
+   * Sets the record config value. If True the system starts record on the
+   * timeFrame
+   * @param {boolean} value - True for start recording.
+   * @return {undefined}
+   */
   setRecordFrame(value) {
     this.config.timeFrame.record = value;
   }
