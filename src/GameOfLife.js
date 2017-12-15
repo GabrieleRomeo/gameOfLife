@@ -160,7 +160,16 @@ const baseConfig = {
 
 const bufferWorker = new BufferWorker();
 
-const generateRndPixels = (length, rows, cols, pxConfig = baseConfig.pixel) => {
+/**
+ * Generates a list of random pixels
+ *
+ * @param      {number}  length  The length
+ * @param      {number}  rows    The rows
+ * @param      {number}  cols    The cols
+ * @param      {Object}  config  The Pixel's configuration object
+ * @return     {Object}  An Object containing a Matrix and a list of Pixels
+ */
+const generateRndPixels = (length, rows, cols, config) => {
   const matrix = new Uint32Array(cols * rows);
   const pixels = [];
 
@@ -168,7 +177,7 @@ const generateRndPixels = (length, rows, cols, pxConfig = baseConfig.pixel) => {
   for (let i = length; (i -= 1); ) {
     const x = getRandomInt(cols + 1);
     const y = getRandomInt(rows + 1);
-    pixels.push(new Pixel(x, y, pxConfig));
+    pixels.push(new Pixel(x, y, config));
     matrix[x + y * cols] = 1;
   }
 
