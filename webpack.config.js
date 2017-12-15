@@ -76,7 +76,7 @@ const config = {
             include: [resolve(__dirname, 'src'), resolve(__dirname, 'test')],
             options: {
               publicPath: './build/',
-              name: 'buffer.worker.[hash].js',
+              name: 'buffer.worker.js',
             },
           },
         ],
