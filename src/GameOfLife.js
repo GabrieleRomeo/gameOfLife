@@ -729,7 +729,7 @@ class GameOfLife {
    * @param {boolean} value - True for start recording.
    * @return {undefined}
    */
-  setRecordFrame(value) {
+  startRecording(value) {
     if (isBoolean(value)) {
       this.config.timeFrame.record = value;
     }
