@@ -545,6 +545,13 @@ const frameHelper = (anim, $canvas, config, pixels) => {
   };
 };
 
+/**
+ * Handles the timeFrame element
+ *
+ * @param      {Object}  ctx     The gameOfLife context
+ * @param      {Array}  pixels  The list of pixels
+ * @return     {Void 0}
+ */
 const handleTimeFrame = (ctx, pixels) => {
   const { animation, $canvas, config, frames, timeFrame } = ctx;
   const createFrame = curry(frameHelper)(animation, $canvas, config);
