@@ -266,7 +266,7 @@ const initCanvas = ($element, config) => {
  * @param      {HTMLCanvasElement}  $splash  The splash canvas
  * @param      {HTMLCanvasElement}  $canvas  The canvas element
  * @param      {Object}  config   The configuration object
- * @return     {Void 0}
+ * @return     {undefined}
  */
 const initSplash = ($splash, $canvas, config) => {
   const { text, useMusicEffect, musicEffect } = config.splash;
@@ -344,7 +344,7 @@ const initBuffer = config => {
  * @param      {number}  cols         The cols
  * @param      {number}  rows         The rows
  * @param      {Object}  pixelConfig  The pixel configuration
- * @return     {Void 0}
+ * @return     {undefined}
  */
 const drawGrid = (anim, cols, rows, pixelConfig) => {
   const context = anim.getContext();
@@ -395,7 +395,7 @@ const drawGrid = (anim, cols, rows, pixelConfig) => {
  *
  * @param      {Object}  anim    The animation Object
  * @param      {(number|string)}  fps     The fps value
- * @return     {Void 0}
+ * @return     {undefined}
  */
 const drawFps = (anim, fps) => {
   const context = anim.getContext();
@@ -413,7 +413,7 @@ const drawFps = (anim, fps) => {
  * @param      {Object}  anim    The animation Object
  * @param      {Array}  pixels  A list of pixels
  * @param      {Object}  config  The configuration Object
- * @return     {Void 0}
+ * @return     {undefined}
  */
 const drawPixels = (anim, pixels, config) => {
   const configCopy = deepMerge({}, config.pixel);
@@ -550,7 +550,7 @@ const frameHelper = (anim, $canvas, config, pixels) => {
  *
  * @param      {Object}  ctx     The gameOfLife context
  * @param      {Array}  pixels  The list of pixels
- * @return     {Void 0}
+ * @return     {undefined}
  */
 const handleTimeFrame = (ctx, pixels) => {
   const { animation, $canvas, config, frames, timeFrame } = ctx;
