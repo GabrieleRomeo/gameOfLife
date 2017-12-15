@@ -394,7 +394,7 @@ const drawGrid = (anim, cols, rows, pixelConfig) => {
  * Draws fps on a Canavas
  *
  * @param      {Object}  anim    The animation Object
- * @param      {[number|string]}  fps     The fps value
+ * @param      {(number|string)}  fps     The fps value
  * @return     {Void 0}
  */
 const drawFps = (anim, fps) => {
