@@ -31,12 +31,12 @@ import BufferWorker from './workers/Buffer.worker';
 const canvasWidthMinValue = 200;
 const canvasHeightMinValue = 200;
 
-const cssNamespace = 'gofl';
+const nameSpace = 'gofl';
 
 const baseConfig = {
   selectors: Object.freeze({
-    gofl: `.${cssNamespace}`,
-    timeFrame: `#${cssNamespace}__timeFrame`,
+    gofl: `.${nameSpace}`,
+    timeFrame: `#${nameSpace}__timeFrame`,
   }),
   canvas: {
     width: {
@@ -276,7 +276,7 @@ const initSplash = ($splash, $canvas, config) => {
   container.setAttribute('style', 'position:relative');
   $canvas.setAttribute('style', 'z-index:0');
   $splash.setAttribute('style', 'position:absolute;top:0;z-index:10');
-  $splash.classList.add(`${cssNamespace}__animation`);
+  $splash.classList.add(`${nameSpace}__animation`);
 
   // When necessary, use the music effect
   if (useMusicEffect === true) {
@@ -462,7 +462,7 @@ const takeSnapshot = ($canvas, scale = 1, quality = 0.9) => {
       const url = URL.createObjectURL(blob);
       newImg.onload = () => URL.revokeObjectURL(url);
       newImg.src = url;
-      newImg.classList.add(`${cssNamespace}__snapshot`);
+      newImg.classList.add(`${nameSpace}__snapshot`);
     },
     'image/jpeg',
     quality,
@@ -499,32 +499,32 @@ const frameHelper = (anim, $canvas, config, pixels) => {
 
   // Set CSS classes
   // to LIST
-  list.classList.add(`${cssNamespace}__log-list`);
+  list.classList.add(`${nameSpace}__log-list`);
   // to ITEMS
-  frameNumberItem.classList.add(`${cssNamespace}__log-item`);
-  timeItem.classList.add(`${cssNamespace}__log-item`);
-  numberOfCellItem.classList.add(`${cssNamespace}__log-item`);
-  screenShotItem.classList.add(`${cssNamespace}__log-item`);
+  frameNumberItem.classList.add(`${nameSpace}__log-item`);
+  timeItem.classList.add(`${nameSpace}__log-item`);
+  numberOfCellItem.classList.add(`${nameSpace}__log-item`);
+  screenShotItem.classList.add(`${nameSpace}__log-item`);
 
   // Define items' content
-  frameNumberItem.innerHTML = `<span class="${cssNamespace}__log-itemKey">
+  frameNumberItem.innerHTML = `<span class="${nameSpace}__log-itemKey">
                                 Frame Number
                               </span>
-                              <span class="${cssNamespace}__log-itemValue">
+                              <span class="${nameSpace}__log-itemValue">
                               ${frame.frame__number}
                              </span>`;
 
-  timeItem.innerHTML = `<span class="${cssNamespace}__log-itemKey">
+  timeItem.innerHTML = `<span class="${nameSpace}__log-itemKey">
                                 Time
                               </span>
-                              <span class="${cssNamespace}__log-itemValue">
+                              <span class="${nameSpace}__log-itemValue">
                               ${frame.time}
                              </span>`;
 
-  numberOfCellItem.innerHTML = `<span class="${cssNamespace}__log-itemKey">
+  numberOfCellItem.innerHTML = `<span class="${nameSpace}__log-itemKey">
                                 Number Of Cells
                               </span>
-                              <span class="${cssNamespace}__log-itemValue">
+                              <span class="${nameSpace}__log-itemValue">
                               ${frame.number_of_Cells}
                              </span>`;
 
@@ -676,7 +676,7 @@ class GameOfLife {
     if (this.animation.isAnimating() === false) {
       // hide the splash canvas by removing its animation class and by setting
       // its opacity to zero
-      this.$splash.classList.remove(`${cssNamespace}__animation`);
+      this.$splash.classList.remove(`${nameSpace}__animation`);
       this.$splashCSS('opacity', 0);
       drawPixels(this.animation, this.buffer.pixels, this.config);
       handleTimeFrame(this, this.buffer.pixels);
