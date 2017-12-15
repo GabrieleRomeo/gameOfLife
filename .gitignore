@@ -3,4 +3,5 @@ __coverage__
 __docs__
 __jsDoc__
 build/buffer*
+!build/buffer.worker.3f301d65f8a1cd33e41f.js
 build/bundle.js
