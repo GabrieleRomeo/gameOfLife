@@ -223,7 +223,7 @@ export const gcss = $e => property =>
  *                        its value
  * @param      {STRING}  property    The name of the CSS property
  * @param      {STRING}  value    The value of the property
- * @return     {void 0}
+ * @return     {undefined}
  */
 export const $css = $e => (property, value) =>
   (function $innerCss() {
