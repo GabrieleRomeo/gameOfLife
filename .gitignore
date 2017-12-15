@@ -1,5 +1,5 @@
 node_modules
 __coverage__
-__jsDoc__
+__docs__
 build/buffer*
 build/bundle.js
