@@ -315,6 +315,13 @@ const initColsRows = ctx => {
   return configCopy;
 };
 
+/**
+ * Initilizes a Buffer containing the following information: a Matrix,
+ * a list of Pixels, the number of rows and cols of the Matrix
+ *
+ * @param      {Object}  config  The configuration object
+ * @return     {Object}  A Buffer Object
+ */
 const initBuffer = config => {
   const { cols, rows } = config.canvas;
   const { pixel, randomPixels } = config;
