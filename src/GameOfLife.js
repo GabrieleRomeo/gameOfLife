@@ -357,6 +357,7 @@ const drawPixels = (anim, pixels, config) => {
 };
 
 const takeSnapshot = ($canvas, scale = 1, quality = 0.9) => {
+  const newImg = $new('IMG');
   const canvasCopy = $new('CANVAS');
   const ctxCopy = canvasCopy.getContext('2d');
   const { height, width } = $canvas;
@@ -376,7 +377,18 @@ const takeSnapshot = ($canvas, scale = 1, quality = 0.9) => {
 
   ctxCopy.drawImage($canvas, 0, 0);
 
-  return canvasCopy.toDataURL('image/png', quality);
+  canvasCopy.toBlob(
+    blob => {
+      const url = URL.createObjectURL(blob);
+      newImg.onload = () => URL.revokeObjectURL(url);
+      newImg.src = url;
+      newImg.classList.add(`${cssNamespace}__snapshot`);
+    },
+    'image/jpeg',
+    quality,
+  );
+
+  return newImg;
 };
 
 const frameHelper = (anim, $canvas, config, pixels) => {
@@ -427,9 +439,7 @@ const frameHelper = (anim, $canvas, config, pixels) => {
                              </span>`;
 
   if (useSnapshots === true) {
-    const img = $new('IMG');
-    img.classList.add(`${cssNamespace}__snapshot`);
-    img.src = takeSnapshot($canvas, scale, quality);
+    const img = takeSnapshot($canvas, scale, quality);
     screenShotItem.appendChild(img);
   }
 
