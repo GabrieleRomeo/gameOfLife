@@ -407,6 +407,14 @@ const drawFps = (anim, fps) => {
   anim.renderOnCanvas();
 };
 
+/**
+ * Draws pixels on a Canvas
+ *
+ * @param      {Object}  anim    The animation Object
+ * @param      {Array}  pixels  A list of pixels
+ * @param      {Object}  config  The configuration Object
+ * @return     {Void 0}
+ */
 const drawPixels = (anim, pixels, config) => {
   const configCopy = deepMerge({}, config.pixel);
   const { randomColors, bgcolor } = config.pixel;
