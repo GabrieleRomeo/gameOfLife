@@ -337,6 +337,15 @@ const initBuffer = config => {
   };
 };
 
+/**
+ * Draws a grid on a Canvas
+ *
+ * @param      {Object}  anim         The animation object
+ * @param      {number}  cols         The cols
+ * @param      {number}  rows         The rows
+ * @param      {Object}  pixelConfig  The pixel configuration
+ * @return     {Void 0}
+ */
 const drawGrid = (anim, cols, rows, pixelConfig) => {
   const context = anim.getContext();
   const minY = 0;
