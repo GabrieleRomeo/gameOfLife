@@ -187,7 +187,16 @@ const generateRndPixels = (length, rows, cols, config) => {
   };
 };
 
-const validateRndNumber = (length = baseConfig.randomPixels, rows, cols) => {
+/**
+ * Checks if the number of random pixels defined within the config object is
+ * valid.
+ *
+ * @param      {number}  length  The length of random pixels
+ * @param      {number}  rows    The number of rows
+ * @param      {number}  cols    The number of cols
+ * @return     {number}  The minimum number of random pixels
+ */
+const validateRndNumber = (length, rows, cols) => {
   const num = isNumber(length) ? length : 1;
   const totCells = rows * cols;
   let minPixels = totCells * 10 / 100;
