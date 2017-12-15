@@ -121,7 +121,7 @@ const baseConfig = {
         rules: [isNumber, isInTheRange(0.1, maxNum)],
       },
       quality: {
-        defaultValue: 0.9,
+        defaultValue: 0.5,
         minValue: 0.1,
         maxValue: 1,
         rules: [isNumber, isInTheRange(0.1, 1)],
@@ -380,6 +380,7 @@ const takeSnapshot = ($canvas, scale = 1, quality = 0.9) => {
 };
 
 const frameHelper = (anim, $canvas, config, pixels) => {
+  // Define the frame Object
   const frame = {
     frame__number: anim.getFrame(),
     time: anim.getTime(),
@@ -388,45 +389,60 @@ const frameHelper = (anim, $canvas, config, pixels) => {
   const { useSnapshots } = config.timeFrame;
   const { scale, quality } = config.timeFrame.snapshots;
 
+  const list = $new('UL');
+  const frameNumberItem = $new('LI');
+  const timeItem = $new('LI');
+  const numberOfCellItem = $new('LI');
+  const screenShotItem = $new('LI');
+
+  // Set CSS classes
+  // to LIST
+  list.classList.add(`${cssNamespace}__log-list`);
+  // to ITEMS
+  frameNumberItem.classList.add(`${cssNamespace}__log-item`);
+  timeItem.classList.add(`${cssNamespace}__log-item`);
+  numberOfCellItem.classList.add(`${cssNamespace}__log-item`);
+  screenShotItem.classList.add(`${cssNamespace}__log-item`);
+
+  // Define items' content
+  frameNumberItem.innerHTML = `<span class="${cssNamespace}__log-itemKey">
+                                Frame Number
+                              </span>
+                              <span class="${cssNamespace}__log-itemValue">
+                              ${frame.frame__number}
+                             </span>`;
+
+  timeItem.innerHTML = `<span class="${cssNamespace}__log-itemKey">
+                                Time
+                              </span>
+                              <span class="${cssNamespace}__log-itemValue">
+                              ${frame.time}
+                             </span>`;
+
+  numberOfCellItem.innerHTML = `<span class="${cssNamespace}__log-itemKey">
+                                Number Of Cells
+                              </span>
+                              <span class="${cssNamespace}__log-itemValue">
+                              ${frame.number_of_Cells}
+                             </span>`;
+
   if (useSnapshots === true) {
-    frame.dataURL = takeSnapshot($canvas, scale, quality);
+    const img = $new('IMG');
+    img.classList.add(`${cssNamespace}__snapshot`);
+    img.src = takeSnapshot($canvas, scale, quality);
+    screenShotItem.appendChild(img);
   }
 
-  return frame;
-};
+  // Append all the children to the list
+  list.appendChild(frameNumberItem);
+  list.appendChild(numberOfCellItem);
+  list.appendChild(timeItem);
+  list.appendChild(screenShotItem);
 
-const renderTimeFrame = step => {
-  const list = $new('UL');
-  list.classList.add(`${cssNamespace}__log-list`);
-  Object.keys(step).forEach(property => {
-    const value = `${step[property]}`;
-    const item = $new('LI');
-    const keyDescription = $new('SPAN');
-    const valDescription = $new('SPAN');
-
-    item.classList.add(`${cssNamespace}__log-item`);
-    keyDescription.classList.add(`${cssNamespace}__log-itemKey`);
-    valDescription.classList.add(`${cssNamespace}__log-itemValue`);
-
-    if (isDefined(value.match(/data:image\//))) {
-      const img = $new('IMG');
-      img.classList.add(`${cssNamespace}__snapshot`);
-      img.src = value;
-      item.appendChild(img);
-    } else {
-      // Add key description
-      keyDescription.textContent = property.split('_').join(' ');
-      valDescription.append(value);
-
-      // Append key and value descriptions to the item
-      item.appendChild(keyDescription);
-      item.appendChild(valDescription);
-    }
-
-    // Append the item to the list
-    list.insertBefore(item, list.firstChild);
-  });
-  return list;
+  return {
+    frame,
+    list,
+  };
 };
 
 const handleTimeFrame = (ctx, pixels) => {
@@ -436,7 +452,7 @@ const handleTimeFrame = (ctx, pixels) => {
   const lastFrame = frames[frames.length - 1];
   // When necessary, record frames and render them
   if (recordFrames === true) {
-    const frame = createFrame(pixels);
+    const { frame, list } = createFrame(pixels);
     // When the current frame is equal to the last one, simply skip
     if (
       isDefined(lastFrame) &&
@@ -445,7 +461,9 @@ const handleTimeFrame = (ctx, pixels) => {
       return;
     }
     if (showTimeFrame === true) {
-      timeFrame.prepend(renderTimeFrame(frame), timeFrame.firstElementChild);
+      window.requestAnimationFrame(() =>
+        timeFrame.prepend(list, timeFrame.firstElementChild),
+      );
     }
     frames.push(frame);
   }
