@@ -260,6 +260,14 @@ const initCanvas = ($element, config) => {
   return $canvas;
 };
 
+/**
+ * Initializes the splash canvas element and calls the neon effect
+ *
+ * @param      {HTMLCanvasElement}  $splash  The splash canvas
+ * @param      {HTMLCanvasElement}  $canvas  The canvas element
+ * @param      {Object}  config   The configuration object
+ * @return     {Void 0}
+ */
 const initSplash = ($splash, $canvas, config) => {
   const { text, useMusicEffect, musicEffect } = config.splash;
   const parent = $canvas.parentNode;
