@@ -478,7 +478,7 @@ const takeSnapshot = ($canvas, scale = 1, quality = 0.9) => {
  * @param      {Object}  anim     The animation Object
  * @param      {HTMLCanavasElement}  $canvas  The canvas element
  * @param      {Object}  config   The configuration Object
- * @param      {Object}  pixels   The pixels Object
+ * @param      {Array}  pixels   The pixels Object
  * @return     {Object}  An Object containing an HTML list and a Frame Object
  */
 const frameHelper = (anim, $canvas, config, pixels) => {
