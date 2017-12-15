@@ -428,6 +428,14 @@ const drawPixels = (anim, pixels, config) => {
   }
 };
 
+/**
+ * Takes a snapshoot a particular canvas and returns an Image
+ *
+ * @param      {HTMLCanvasElement}  $canvas  The canvas element
+ * @param      {number}  [scale]    The scale value
+ * @param      {number}  [quality ] The quality value
+ * @return     {HTMLImgElement}     An image
+ */
 const takeSnapshot = ($canvas, scale = 1, quality = 0.9) => {
   const newImg = $new('IMG');
   const canvasCopy = $new('CANVAS');
