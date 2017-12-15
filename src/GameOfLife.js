@@ -730,7 +730,9 @@ class GameOfLife {
    * @return {undefined}
    */
   setRecordFrame(value) {
-    this.config.timeFrame.record = value;
+    if (isBoolean(value)) {
+      this.config.timeFrame.record = value;
+    }
   }
 }
 
