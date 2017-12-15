@@ -214,6 +214,13 @@ const validateRndNumber = (length, rows, cols) => {
   return Math.floor(minPixels);
 };
 
+/**
+ * Initializes the primary canvas element
+ *
+ * @param      {HTMLCanvasElement}    $element  The canvas element
+ * @param      {Object}    config    The configuration object
+ * @return     {HTMLCanvasElement}  The initialized canvas HTML element
+ */
 const initCanvas = ($element, config) => {
   const $canvas = isCanvas($element) ? $element : $new('CANVAS', document.body);
   const { width, height, fullScreen } = config.canvas;
