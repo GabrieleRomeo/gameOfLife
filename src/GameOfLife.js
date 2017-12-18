@@ -12,6 +12,7 @@ import {
 } from './utilities';
 import {
   isDefined,
+  safeisNaN,
   isInteger,
   isInTheRange,
   isInTheBody,
@@ -240,11 +241,11 @@ const initCanvas = ($element, config) => {
    *
    */
 
-  if (!Number.isNaN($canvasWidth) && hasMinimumWidth($canvasWidth)) {
+  if (!safeisNaN($canvasWidth) && hasMinimumWidth($canvasWidth)) {
     finalWidth = $canvasWidth;
   }
 
-  if (!Number.isNaN($canvasHeight) && hasMinimumHeight($canvasHeight)) {
+  if (!safeisNaN($canvasHeight) && hasMinimumHeight($canvasHeight)) {
     finalHeight = $canvasHeight;
   }
 
@@ -563,7 +564,9 @@ const handleTimeFrame = (ctx, pixels) => {
     // When the current frame is equal to the last one, simply skip
     if (
       isDefined(lastFrame) &&
-      frame.frame__number === lastFrame.frame__number
+      (frame.frame__number === lastFrame.frame__number &&
+        frame.time === lastFrame.time &&
+        frame.number_of_Cells === lastFrame.number_of_Cells)
     ) {
       return;
     }
