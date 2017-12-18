@@ -243,8 +243,17 @@ export const isInTheBody = x => document.body.contains(x);
  * @returns {Function} Takes an argument and checks if the argument is greather
  *                     than the minimum value
  * @param {Number} x The value under the test
- * @returns {Boolean} True if the argument is greather than the minimum value, 
+ * @returns {Boolean} True if the argument is greather than the minimum value,
  *                    false otherwise
  *
  */
 export const isGreatherThan = y => x => x > y;
+
+/**
+ * Provides a cross-browser isNaN method
+ * @param {Any} x
+ *
+ * @returns {boolean} True if the argument is not a number, False otherwise
+ */
+// eslint-disable-next-line no-self-compare
+export const safeisNaN = x => (Number.isNaN && Number.isNaN(x)) || x !== x;
