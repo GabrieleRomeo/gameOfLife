@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Document</title>
+  <link href="https://fonts.googleapis.com/css?family=Francois+One%7CHoltwood+One+SC&subset=latin" rel="stylesheet">
   <link href="https://use.fontawesome.com/118670e9e2.css" media="all" rel="stylesheet">
-  <link href="//fonts.googleapis.com/css?family=Francois+One%7CHoltwood+One+SC&subset=latin" rel="stylesheet">
   <link rel="stylesheet" href="public/style.css">
   <link rel="stylesheet" href="public/switch.css">
 </head>
@@ -28,8 +28,10 @@
             <span></span>
           </div>
         </section>
-        <section>
-          <div class="gofl__timeFrame" id="gofl__timeFrame">
+        <section class="gofl__timeFrame">
+          <div class="gofl__arrowleft"  id="gofl__arrowleft">&lt;</div>
+          <div class="gofl__arrowright"  id="gofl__arrowright">&gt;</div>
+          <div class="gofl__frameList" id="gofl__frameList">
           </div>
         </section>
     </article>
@@ -44,10 +46,14 @@
   <script src="build/bundle.min.js"></script>
   <script>
       document.addEventListener('DOMContentLoaded', function() {
+        var scrolling;
         var startBtn = document.querySelector('#start');
         var stopBtn = document.querySelector('#stop');
         var switchTF = document.querySelector('#switchTimeFrames');
         var canvas = document.querySelector('#gofl__canvas');
+        var frameList = document.querySelector('#gofl__frameList');
+        var left = document.querySelector('#gofl__arrowleft');
+        var right = document.querySelector('#gofl__arrowright');
         var game = new gameOfLife.default(canvas, {
           randomPixels: 4500,
           canvas: {
@@ -73,6 +79,22 @@
           }
         });
 
+        var handleMouseUp = function(event) {
+          window.clearInterval(scrolling);
+        }
+
+
+        var handleMouseDown = function(event) {
+          var stepValue = 10;
+          var step = event.target === left ? (-stepValue) : stepValue;
+          
+          scrolling = window.setInterval(function() {
+            frameList.scrollLeft += step;
+            step = step < 0 ? step - 1 : step + 1;
+          }, 10);
+        }
+
+
         switchTF.addEventListener('change', function(event) {
           game.startRecording(this.checked);
         })
@@ -85,10 +107,15 @@
         stopBtn.addEventListener('click', function(event) {
           event.preventDefault();
           game.stop();
-          startBtn.classList.remove('gofl__button--warn');
-          startBtn.classList.add('gofl__button--info');
-          startBtn.firstElementChild.textContent = 'Start';
+          startBtn.classList.add('gofl__button--warn');
+          startBtn.firstElementChild.textContent = 'Resume';
         });
+
+        left.addEventListener('mousedown', handleMouseDown);
+        right.addEventListener('mousedown', handleMouseDown);
+
+        left.addEventListener('mouseup', handleMouseUp);
+        right.addEventListener('mouseup', handleMouseUp);
       })
   </script>
 </body>

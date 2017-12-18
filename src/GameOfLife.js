@@ -12,6 +12,7 @@ import {
 } from './utilities';
 import {
   isDefined,
+  safeisNaN,
   isInteger,
   isInTheRange,
   isInTheBody,
@@ -37,6 +38,7 @@ const baseConfig = {
   selectors: Object.freeze({
     gofl: `.${nameSpace}`,
     timeFrame: `#${nameSpace}__timeFrame`,
+    frameList: `#${nameSpace}__frameList`,
   }),
   canvas: {
     width: {
@@ -101,7 +103,7 @@ const baseConfig = {
     },
     $element: {
       defaultValue: () => {
-        const selector = baseConfig.selectors.timeFrame;
+        const selector = baseConfig.selectors.frameList;
         let $element = $(selector);
         if (!isDefined($element)) {
           $element = $new('DIV');
@@ -240,11 +242,11 @@ const initCanvas = ($element, config) => {
    *
    */
 
-  if (!Number.isNaN($canvasWidth) && hasMinimumWidth($canvasWidth)) {
+  if (!safeisNaN($canvasWidth) && hasMinimumWidth($canvasWidth)) {
     finalWidth = $canvasWidth;
   }
 
-  if (!Number.isNaN($canvasHeight) && hasMinimumHeight($canvasHeight)) {
+  if (!safeisNaN($canvasHeight) && hasMinimumHeight($canvasHeight)) {
     finalHeight = $canvasHeight;
   }
 
@@ -563,14 +565,14 @@ const handleTimeFrame = (ctx, pixels) => {
     // When the current frame is equal to the last one, simply skip
     if (
       isDefined(lastFrame) &&
-      frame.frame__number === lastFrame.frame__number
+      (frame.frame__number === lastFrame.frame__number &&
+        frame.time === lastFrame.time &&
+        frame.number_of_Cells === lastFrame.number_of_Cells)
     ) {
       return;
     }
-    if (showTimeFrame === true) {
-      window.requestAnimationFrame(() =>
-        timeFrame.prepend(list, timeFrame.firstElementChild),
-      );
+    if (showTimeFrame === true && isDefined(list)) {
+      window.requestAnimationFrame(() => timeFrame.appendChild(list));
     }
     frames.push(frame);
   }
@@ -630,6 +632,7 @@ class GameOfLife {
 
       bufferWorker.onmessage = event => {
         const { pixels, matrix } = event.data;
+        anim.frame += 1;
 
         // clear the canvas
         anim.clear();
@@ -714,11 +717,12 @@ class GameOfLife {
    */
   stop() {
     if (this.animation.isAnimating() === true) {
-      const { $element: $timeFrame } = this.config.timeFrame;
-      $timeFrame.innerHTML = '';
-      window.requestAnimationFrame(() =>
-        $timeFrame.appendChild(this.timeFrame),
-      );
+      const { $element: $frameList } = this.config.timeFrame;
+      $frameList.innerHTML = '';
+      window.requestAnimationFrame(() => {
+        $frameList.appendChild(this.timeFrame);
+        $frameList.parentNode.setAttribute('style', 'visibility:visible');
+      });
       this.animation.stop();
     }
   }
