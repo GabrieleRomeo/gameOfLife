@@ -28,8 +28,10 @@
             <span></span>
           </div>
         </section>
-        <section>
-          <div class="gofl__timeFrame" id="gofl__timeFrame">
+        <section class="gofl__timeFrame">
+          <div class="gofl__arrowleft"  id="gofl__arrowleft">&lt;</div>
+          <div class="gofl__arrowright"  id="gofl__arrowright">&gt;</div>
+          <div class="gofl__frameList" id="gofl__frameList">
           </div>
         </section>
     </article>
@@ -44,10 +46,14 @@
   <script src="build/bundle.min.js"></script>
   <script>
       document.addEventListener('DOMContentLoaded', function() {
+        var scrolling;
         var startBtn = document.querySelector('#start');
         var stopBtn = document.querySelector('#stop');
         var switchTF = document.querySelector('#switchTimeFrames');
         var canvas = document.querySelector('#gofl__canvas');
+        var frameList = document.querySelector('#gofl__frameList');
+        var left = document.querySelector('#gofl__arrowleft');
+        var right = document.querySelector('#gofl__arrowright');
         var game = new gameOfLife.default(canvas, {
           randomPixels: 4500,
           canvas: {
@@ -73,6 +79,22 @@
           }
         });
 
+        var handleMouseUp = function(event) {
+          window.clearInterval(scrolling);
+        }
+
+
+        var handleMouseDown = function(event) {
+          var stepValue = 10;
+          var step = event.target === left ? (-stepValue) : stepValue;
+          
+          scrolling = window.setInterval(function() {
+            frameList.scrollLeft += step;
+            step = step < 0 ? step - 1 : step + 1;
+          }, 10);
+        }
+
+
         switchTF.addEventListener('change', function(event) {
           game.startRecording(this.checked);
         })
@@ -88,6 +110,12 @@
           startBtn.classList.add('gofl__button--warn');
           startBtn.firstElementChild.textContent = 'Resume';
         });
+
+        left.addEventListener('mousedown', handleMouseDown);
+        right.addEventListener('mousedown', handleMouseDown);
+
+        left.addEventListener('mouseup', handleMouseUp);
+        right.addEventListener('mouseup', handleMouseUp);
       })
   </script>
 </body>
