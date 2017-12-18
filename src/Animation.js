@@ -22,7 +22,7 @@ class Animation {
     this.timeInterval = 0;
     this.startTime = 0;
     this.lastTime = 0;
-    this.frame = 0;
+    this.frame = -1;
     this.animating = false;
 
     window.requestAnimationFrame = (callback =>
@@ -111,7 +111,7 @@ class Animation {
    * @returns {void}
    */
   animationLoop() {
-    this.frame += 1;
+    // this.frame += 1;
     const date = new Date();
     const time = date.getTime();
 

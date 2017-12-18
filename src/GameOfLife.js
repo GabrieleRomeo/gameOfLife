@@ -567,10 +567,8 @@ const handleTimeFrame = (ctx, pixels) => {
     ) {
       return;
     }
-    if (showTimeFrame === true) {
-      window.requestAnimationFrame(() =>
-        timeFrame.prepend(list, timeFrame.firstElementChild),
-      );
+    if (showTimeFrame === true && isDefined(list)) {
+      window.requestAnimationFrame(() => timeFrame.appendChild(list));
     }
     frames.push(frame);
   }
@@ -630,6 +628,7 @@ class GameOfLife {
 
       bufferWorker.onmessage = event => {
         const { pixels, matrix } = event.data;
+        anim.frame += 1;
 
         // clear the canvas
         anim.clear();
