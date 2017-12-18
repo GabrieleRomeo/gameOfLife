@@ -38,6 +38,7 @@ const baseConfig = {
   selectors: Object.freeze({
     gofl: `.${nameSpace}`,
     timeFrame: `#${nameSpace}__timeFrame`,
+    frameList: `#${nameSpace}__frameList`,
   }),
   canvas: {
     width: {
@@ -102,7 +103,7 @@ const baseConfig = {
     },
     $element: {
       defaultValue: () => {
-        const selector = baseConfig.selectors.timeFrame;
+        const selector = baseConfig.selectors.frameList;
         let $element = $(selector);
         if (!isDefined($element)) {
           $element = $new('DIV');
@@ -716,11 +717,12 @@ class GameOfLife {
    */
   stop() {
     if (this.animation.isAnimating() === true) {
-      const { $element: $timeFrame } = this.config.timeFrame;
-      $timeFrame.innerHTML = '';
-      window.requestAnimationFrame(() =>
-        $timeFrame.appendChild(this.timeFrame),
-      );
+      const { $element: $frameList } = this.config.timeFrame;
+      $frameList.innerHTML = '';
+      window.requestAnimationFrame(() => {
+        $frameList.appendChild(this.timeFrame);
+        $frameList.parentNode.setAttribute('style', 'visibility:visible');
+      });
       this.animation.stop();
     }
   }
