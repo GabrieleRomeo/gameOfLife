@@ -111,7 +111,6 @@ class Animation {
    * @returns {void}
    */
   animationLoop() {
-    // this.frame += 1;
     const date = new Date();
     const time = date.getTime();
 
