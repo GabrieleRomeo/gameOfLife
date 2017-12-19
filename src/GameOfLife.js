@@ -160,6 +160,12 @@ const baseConfig = {
         defaultValue: 'public/light-bulb.wav',
         rules: [isString],
       },
+      volume: {
+        defaultValue: 0.3,
+        minValue: 0.1,
+        maxValue: 1,
+        rules: [isNumber, isInTheRange(0.1, 1)],
+      },
     },
   },
 };
@@ -289,6 +295,7 @@ const initSplash = ($splash, $canvas, config) => {
     const audio = $new('AUDIO', document.body);
     const source = $new('SOURCE', audio);
     audio.setAttribute('autoplay', '');
+    audio.volume = musicEffect.volume;
     source.setAttribute('src', `${musicEffect.path}`);
   }
 
