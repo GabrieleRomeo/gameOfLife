@@ -84,7 +84,6 @@
           window.clearInterval(scrolling);
         }
 
-
         var handleMouseDown = function(event) {
           var stepValue = 10;
           var step = event.target === left ? (-stepValue) : stepValue;
@@ -94,7 +93,6 @@
             step = step < 0 ? step - 1 : step + 1;
           }, 10);
         }
-
 
         switchTF.addEventListener('change', function(event) {
           game.startRecording(this.checked);
