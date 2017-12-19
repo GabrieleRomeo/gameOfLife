@@ -91,8 +91,8 @@ const getMetrics = (text, font) => {
   };
 };
 
-export const neonLightEffect = ($canvas, text, config) => {
-  const { fontFamily, fontSize } = config.splash;
+export const neonLightEffect = ($canvas, strTxt, config) => {
+  const { fontFamily, fontSize, isUpperCase } = config.splash;
   const $canvasCSS = gcss($canvas);
   const $canvasBorder = Number.parseInt($canvasCSS('border-width'), 10) || 0;
   const $canvasPadding = Number.parseInt($canvasCSS('padding-width'), 10) || 0;
@@ -105,6 +105,7 @@ export const neonLightEffect = ($canvas, text, config) => {
   let offsetX = cnvWidth / 2;
   let offsetY = cnvHeight / 2;
   const blur = getBlurValue(100);
+  const text = isUpperCase === true ? strTxt.toUpperCase() : strTxt;
 
   // calculate width + height of text-block
   let metrics = getMetrics(text, font);
@@ -128,7 +129,7 @@ export const neonLightEffect = ($canvas, text, config) => {
 
   // create clipping mask around text-effect
   ctx.rect(
-    offsetX - blur / 2,
+    offsetX - blur / 4,
     offsetY - blur - jitter,
     offsetX + metrics.width,
     metrics.height + blur + jitter + 20,

@@ -140,12 +140,16 @@ const baseConfig = {
       rules: [isString],
     },
     fontFamily: {
-      defaultValue: '"Holtwood One SC", Futura, Helvetica, sans-serif',
+      defaultValue: 'Arial Black',
       rules: [isString],
     },
     fontSize: {
       defaultValue: 70,
       rules: [isInteger],
+    },
+    isUpperCase: {
+      defaultValue: true,
+      rules: [isBoolean],
     },
     useMusicEffect: {
       defaultValue: true,
