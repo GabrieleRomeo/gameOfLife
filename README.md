@@ -43,6 +43,7 @@ The main class constructor accepts an HTMLCanvasElement and an optional config f
   * `text` - (default `The Game of Life`) - A string for the splash intro
   * `fontFamily` - (default `"Holtwood One SC", Futura, Helvetica, sans-serif`)
   * `fontSize` - (default `70`)
+  * `isUpperCase` - (default `true`) - If true it makes the text upperCase
   * `useMusicEffect` - (default `true`) - If true it reproduces a music effect at startup
 * A `musicEffect` object with the following properties:
   * `path` - (default `public/light-bulb.wav`) - The path of a music file
@@ -52,7 +53,6 @@ The main class constructor accepts an HTMLCanvasElement and an optional config f
 
 
 Click the following link to see a [Demo](https://gabrieleromeo.github.io/gameOfLife/) 
-
 
 ----------------
 
