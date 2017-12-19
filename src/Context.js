@@ -12,6 +12,7 @@ class Context {
       save: () => this.ctx.save(),
       restore: () => this.ctx.restore(),
       beginPath: () => this.ctx.beginPath(),
+      closePath: () => this.ctx.closePath(),
       drawImage: (image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) => {
         this.ctx.drawImage(
           image,
