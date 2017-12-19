@@ -7,6 +7,47 @@ export const minNum = Number.MIN_SAFE_INTEGER;
 export const maxNum = Number.MAX_SAFE_INTEGER;
 
 /**
+  * Provides a safe Object.assign method with a Polyfill
+  * https://developer.mozilla.org/it/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
+  */
+export const safeAssign =
+  Object.assign ||
+  Object.defineProperty(Object, 'assign', {
+    enumerable: false,
+    configurable: true,
+    writable: true,
+    value: target => {
+      if (target === undefined || target === null) {
+        throw new TypeError('Cannot convert first argument to object');
+      }
+
+      const to = Object(target);
+      for (let i = 1; i < arguments.length; i += 1) {
+        let nextSource = arguments[i];
+        if (nextSource === undefined || nextSource === null) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+        nextSource = Object(nextSource);
+
+        const keysArray = Object.keys(Object(nextSource));
+        for (
+          let nextIndex = 0, len = keysArray.length;
+          nextIndex < len;
+          nextIndex += 1
+        ) {
+          const nextKey = keysArray[nextIndex];
+          const desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
+          if (desc !== undefined && desc.enumerable) {
+            to[nextKey] = nextSource[nextKey];
+          }
+        }
+      }
+      return to;
+    },
+  });
+
+/**
   * Take a function and returns another function which takes a list of arguments
   * and applies the first function to the arguments swapped in reverse order.
   */
@@ -53,7 +94,7 @@ export const run = (fn, n) => curry(flip(fn), n);
  * Executes a shallow copy of the provided source objects into a target object
  */
 export const copy = (t, ...ss) =>
-  ss.reduce((o, s) => Object.assign(o, { ...s }), { ...t });
+  ss.reduce((o, s) => safeAssign(o, { ...s }), { ...t });
 
 /**
  * Makes a deep merge between a Target object and a Source
@@ -68,10 +109,10 @@ const innerMergeDeep = (target, source) => {
   if (isObj(target) && isObj(source)) {
     Object.keys(source).forEach(key => {
       if (isObj(source[key])) {
-        if (!target[key]) Object.assign(target, { [key]: {} });
+        if (!target[key]) safeAssign(target, { [key]: {} });
         innerMergeDeep(target[key], source[key]);
       } else {
-        Object.assign(target, { [key]: source[key] });
+        safeAssign(target, { [key]: source[key] });
       }
     });
   }
@@ -122,7 +163,7 @@ export const flatten = (obj, name, stem) => {
 
   Object.keys(obj).forEach(p => {
     const prop = flatten(obj[p], p, newStem);
-    out = Object.assign({}, out, prop);
+    out = safeAssign({}, out, prop);
   });
 
   return out;
