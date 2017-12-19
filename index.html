@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Document</title>
-  <link href="https://fonts.googleapis.com/css?family=Francois+One%7CHoltwood+One+SC&subset=latin" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Francois+One&subset=latin" rel="stylesheet">
   <link href="https://use.fontawesome.com/118670e9e2.css" media="all" rel="stylesheet">
   <link rel="stylesheet" href="public/style.css">
   <link rel="stylesheet" href="public/switch.css">
@@ -43,7 +43,7 @@
             <i class="footer__icon fa fa-heartbeat" aria-hidden="true"></i>
     </footer>
   </section>
-  <script src="build/bundle.min.js"></script>
+  <script src="build/bundle.js"></script>
   <script>
       document.addEventListener('DOMContentLoaded', function() {
         var scrolling;
@@ -71,7 +71,8 @@
             show: true,
             useSnapshots: true,
             snapshots: {
-              scale: 0.6
+              scale: 0.7,
+              quality: 0.3
             }
           },
           splash: {
@@ -106,9 +107,13 @@
 
         stopBtn.addEventListener('click', function(event) {
           event.preventDefault();
-          game.stop();
-          startBtn.classList.add('gofl__button--warn');
-          startBtn.firstElementChild.textContent = 'Resume';
+          if (game.isAnimating()) {
+            game.stop();
+            if (startBtn.firstElementChild.textContent !== 'Resume') {
+              startBtn.classList.add('gofl__button--warn');
+              startBtn.firstElementChild.textContent = 'Resume';
+            }
+          }
         });
 
         left.addEventListener('mousedown', handleMouseDown);
