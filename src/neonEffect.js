@@ -130,7 +130,7 @@ export const neonLightEffect = ($canvas, text, config) => {
   ctx.rect(
     offsetX - blur / 2,
     offsetY - blur - jitter,
-    offsetX + metrics.width + blur,
+    offsetX + metrics.width,
     metrics.height + blur + jitter + 20,
   );
   ctx.clip();
@@ -139,7 +139,7 @@ export const neonLightEffect = ($canvas, text, config) => {
   ctx.save();
   ctx.fillStyle = '#fff';
   ctx.shadowColor = 'rgba(0,0,0,1)';
-  ctx.shadowOffsetX = metrics.width + blur;
+  ctx.shadowOffsetX = metrics.width + blur + 30;
   ctx.shadowOffsetY = 0;
   ctx.shadowBlur = blur;
   ctx.fillText(text, -metrics.width + offsetX - blur, metricsY);
@@ -163,7 +163,7 @@ export const neonLightEffect = ($canvas, text, config) => {
   // apply gradient to shadow-blur
   ctx.fillStyle = gradient;
   ctx.fillRect(
-    offsetX - jitter - 30,
+    offsetX - jitter,
     offsetY - jitter - blur,
     metrics.width + offsetX + 120,
     metrics.height + offsetY + jitter,
