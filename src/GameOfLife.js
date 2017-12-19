@@ -676,7 +676,7 @@ class GameOfLife {
    */
   start() {
     // if the animation is not started yet
-    if (this.animation.isAnimating() === false) {
+    if (this.isAnimating() === false) {
       // hide the splash canvas by removing its animation class and by setting
       // its opacity to zero
       this.$splash.classList.remove(`${nameSpace}__animation`);
@@ -688,11 +688,19 @@ class GameOfLife {
   }
 
   /**
+   * Returns the animation's status
+   * @return {Boolean} True if the animation is running, False otherwise
+   */
+  isAnimating() {
+    return this.animation.isAnimating();
+  }
+
+  /**
    * Pauses the Game
    * @return {undefined}
    */
   pause() {
-    if (this.animation.isAnimating() === true) {
+    if (this.isAnimating() === true) {
       // show the splash canvas
       this.$splashCSS('opacity', 0.1);
       this.animation.stop();
@@ -704,7 +712,7 @@ class GameOfLife {
    * @return {undefined}
    */
   resume() {
-    if (this.animation.isAnimating() === false) {
+    if (this.isAnimating() === false) {
       // hide the splash canvas
       this.$splashCSS('opacity', 0);
       this.animation.start();
@@ -716,13 +724,16 @@ class GameOfLife {
    * @return {undefined}
    */
   stop() {
-    if (this.animation.isAnimating() === true) {
+    if (this.isAnimating() === true) {
       const { $element: $frameList } = this.config.timeFrame;
-      $frameList.innerHTML = '';
-      window.requestAnimationFrame(() => {
-        $frameList.appendChild(this.timeFrame);
-        $frameList.parentNode.setAttribute('style', 'visibility:visible');
-      });
+      // when the frameList contains a least one child append it to
+      if (this.timeFrame.childElementCount > 0) {
+        $frameList.innerHTML = '';
+        window.requestAnimationFrame(() => {
+          $frameList.appendChild(this.timeFrame);
+          $frameList.parentNode.setAttribute('style', 'visibility:visible');
+        });
+      }
       this.animation.stop();
     }
   }
