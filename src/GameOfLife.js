@@ -542,8 +542,9 @@ const frameHelper = (anim, $canvas, config, pixels) => {
                              </span>`;
 
   if (useSnapshots === true) {
-    const img = takeSnapshot($canvas, scale, quality);
-    screenShotItem.appendChild(img);
+    window.requestAnimationFrame(() =>
+      screenShotItem.appendChild(takeSnapshot($canvas, scale, quality)),
+    );
   }
 
   // Append all the children to the list
