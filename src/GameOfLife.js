@@ -367,9 +367,12 @@ const drawGrid = (anim, cols, rows, pixelConfig) => {
   const minX = 0;
   const iStrokeWidth = 1;
   const iTranslate = (iStrokeWidth % 2) / 2;
+  let r = rows;
+  let c = cols;
 
   // Draw ROWS
-  for (let r = 1; r < rows; r += 1) {
+  // eslint-disable-next-line no-cond-assign
+  while ((r -= 1)) {
     context.translate(iTranslate, 0);
     context.save();
     context.beginPath();
@@ -385,7 +388,8 @@ const drawGrid = (anim, cols, rows, pixelConfig) => {
   }
 
   // Draw COLUMNS
-  for (let c = 1; c < cols; c += 1) {
+  // eslint-disable-next-line no-cond-assign
+  while ((c -= 1)) {
     context.translate(iTranslate, 0);
     context.save();
     context.beginPath();
@@ -429,14 +433,13 @@ const drawFps = (anim, fps) => {
  * @return     {undefined}
  */
 const drawPixels = (anim, pixels, config) => {
-  const configCopy = deepMerge({}, config.pixel);
-  const { randomColors, bgcolor } = config.pixel;
+  const { randomColors, bgcolor: configColor, width, height } = config.pixel;
   let i = pixels.length || 0;
   // eslint-disable-next-line no-cond-assign
   while ((i -= 1)) {
     const { x, y } = pixels[i];
-    configCopy.bgcolor = randomColors === true ? randomRGBA() : bgcolor;
-    const pixel = new Pixel(x, y, configCopy);
+    const bgcolor = randomColors === true ? randomRGBA() : configColor;
+    const pixel = new Pixel(x, y, { bgcolor, width, height });
     pixel.render(anim);
   }
 };
