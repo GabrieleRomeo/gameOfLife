@@ -3,12 +3,7 @@ import { copy } from './utilities';
 const baseConfig = {
   height: 0,
   width: 0,
-  state: 0,
-  showBorders: false,
-  showTransition: false,
   bgcolor: '#000',
-  borderColor: '#000',
-  lineWidth: 1,
 };
 
 class Pixel {
