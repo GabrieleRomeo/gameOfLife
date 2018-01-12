@@ -466,7 +466,6 @@ const takeSnapshot = ($canvas, scale = 1, quality = 0.9) => {
   canvasCopy.style.width = `${scaledWidth}px`;
   canvasCopy.style.height = `${scaledHeight}px`;
 
-  ctxCopy.mozImageSmoothingEnabled = false;
   ctxCopy.imageSmoothingEnabled = false;
 
   ctxCopy.scale(scale, scale);
@@ -740,6 +739,7 @@ class GameOfLife {
    */
   stop() {
     if (this.isAnimating() === true) {
+      this.animation.stop();
       const { $element: $frameList } = this.config.timeFrame;
       // when the frameList contains a least one child append it to
       if (this.timeFrame.childElementCount > 0) {
@@ -749,7 +749,6 @@ class GameOfLife {
           $frameList.parentNode.setAttribute('style', 'visibility:visible');
         });
       }
-      this.animation.stop();
     }
   }
 
