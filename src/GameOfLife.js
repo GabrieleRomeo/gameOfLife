@@ -450,41 +450,46 @@ const drawPixels = (anim, pixels, config) => {
  * @param      {HTMLCanvasElement}  $canvas  The canvas element
  * @param      {number}  [scale]    The scale value
  * @param      {number}  [quality ] The quality value
- * @return     {HTMLImgElement}     An image
+ * @return     {Promise}   A promise
  */
-const takeSnapshot = ($canvas, scale = 1, quality = 0.9) => {
-  const newImg = $new('IMG');
-  const canvasCopy = $new('CANVAS');
-  const ctxCopy = canvasCopy.getContext('2d');
-  const { height, width } = $canvas;
-  const scaledWidth = scale * width;
-  const scaledHeight = scale * height;
+const takeSnapshot = ($canvas, scale = 1, quality = 0.9) =>
+  new Promise((resolve, reject) => {
+    const newImg = $new('IMG');
+    const canvasCopy = $new('CANVAS');
+    const ctxCopy = canvasCopy.getContext('2d');
+    const { height, width } = $canvas;
+    const scaledWidth = scale * width;
+    const scaledHeight = scale * height;
 
-  canvasCopy.width = scaledWidth;
-  canvasCopy.height = scaledHeight;
+    canvasCopy.width = scaledWidth;
+    canvasCopy.height = scaledHeight;
 
-  canvasCopy.style.width = `${scaledWidth}px`;
-  canvasCopy.style.height = `${scaledHeight}px`;
+    canvasCopy.style.width = `${scaledWidth}px`;
+    canvasCopy.style.height = `${scaledHeight}px`;
 
-  ctxCopy.imageSmoothingEnabled = false;
+    ctxCopy.imageSmoothingEnabled = false;
 
-  ctxCopy.scale(scale, scale);
+    ctxCopy.scale(scale, scale);
 
-  ctxCopy.drawImage($canvas, 0, 0);
+    ctxCopy.drawImage($canvas, 0, 0);
 
-  canvasCopy.toBlob(
-    blob => {
-      const url = URL.createObjectURL(blob);
-      newImg.onload = () => URL.revokeObjectURL(url);
-      newImg.src = url;
-      newImg.classList.add(`${nameSpace}__snapshot`);
-    },
-    'image/jpeg',
-    quality,
-  );
+    try {
+      canvasCopy.toBlob(
+        blob => {
+          const url = URL.createObjectURL(blob);
+          newImg.onload = () => URL.revokeObjectURL(url);
+          newImg.src = url;
+          newImg.classList.add(`${nameSpace}__snapshot`);
+        },
+        'image/jpeg',
+        quality,
+      );
+    } catch (error) {
+      reject(error);
+    }
 
-  return newImg;
-};
+    resolve(newImg);
+  });
 
 /**
  * An Helper function which is used to define the items that are used to compose
@@ -544,8 +549,9 @@ const frameHelper = (anim, $canvas, config, pixels) => {
                              </span>`;
 
   if (useSnapshots === true) {
-    window.requestAnimationFrame(() =>
-      screenShotItem.appendChild(takeSnapshot($canvas, scale, quality)),
+    takeSnapshot($canvas, scale, quality).then(
+      img => screenShotItem.appendChild(img),
+      reason => console.error('Something went wrong', reason),
     );
   }
 
