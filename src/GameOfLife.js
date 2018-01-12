@@ -367,9 +367,12 @@ const drawGrid = (anim, cols, rows, pixelConfig) => {
   const minX = 0;
   const iStrokeWidth = 1;
   const iTranslate = (iStrokeWidth % 2) / 2;
+  let r = rows;
+  let c = cols;
 
   // Draw ROWS
-  for (let r = 1; r < rows; r += 1) {
+  // eslint-disable-next-line no-cond-assign
+  while ((r -= 1)) {
     context.translate(iTranslate, 0);
     context.save();
     context.beginPath();
@@ -385,7 +388,8 @@ const drawGrid = (anim, cols, rows, pixelConfig) => {
   }
 
   // Draw COLUMNS
-  for (let c = 1; c < cols; c += 1) {
+  // eslint-disable-next-line no-cond-assign
+  while ((c -= 1)) {
     context.translate(iTranslate, 0);
     context.save();
     context.beginPath();
@@ -429,14 +433,13 @@ const drawFps = (anim, fps) => {
  * @return     {undefined}
  */
 const drawPixels = (anim, pixels, config) => {
-  const configCopy = deepMerge({}, config.pixel);
-  const { randomColors, bgcolor } = config.pixel;
+  const { randomColors, bgcolor: configColor, width, height } = config.pixel;
   let i = pixels.length || 0;
   // eslint-disable-next-line no-cond-assign
   while ((i -= 1)) {
     const { x, y } = pixels[i];
-    configCopy.bgcolor = randomColors === true ? randomRGBA() : bgcolor;
-    const pixel = new Pixel(x, y, configCopy);
+    const bgcolor = randomColors === true ? randomRGBA() : configColor;
+    const pixel = new Pixel(x, y, { bgcolor, width, height });
     pixel.render(anim);
   }
 };
@@ -447,42 +450,46 @@ const drawPixels = (anim, pixels, config) => {
  * @param      {HTMLCanvasElement}  $canvas  The canvas element
  * @param      {number}  [scale]    The scale value
  * @param      {number}  [quality ] The quality value
- * @return     {HTMLImgElement}     An image
+ * @return     {Promise}   A promise
  */
-const takeSnapshot = ($canvas, scale = 1, quality = 0.9) => {
-  const newImg = $new('IMG');
-  const canvasCopy = $new('CANVAS');
-  const ctxCopy = canvasCopy.getContext('2d');
-  const { height, width } = $canvas;
-  const scaledWidth = scale * width;
-  const scaledHeight = scale * height;
+const takeSnapshot = ($canvas, scale = 1, quality = 0.9) =>
+  new Promise((resolve, reject) => {
+    const newImg = $new('IMG');
+    const canvasCopy = $new('CANVAS');
+    const ctxCopy = canvasCopy.getContext('2d');
+    const { height, width } = $canvas;
+    const scaledWidth = scale * width;
+    const scaledHeight = scale * height;
 
-  canvasCopy.width = scaledWidth;
-  canvasCopy.height = scaledHeight;
+    canvasCopy.width = scaledWidth;
+    canvasCopy.height = scaledHeight;
 
-  canvasCopy.style.width = `${scaledWidth}px`;
-  canvasCopy.style.height = `${scaledHeight}px`;
+    canvasCopy.style.width = `${scaledWidth}px`;
+    canvasCopy.style.height = `${scaledHeight}px`;
 
-  ctxCopy.mozImageSmoothingEnabled = false;
-  ctxCopy.imageSmoothingEnabled = false;
+    ctxCopy.imageSmoothingEnabled = false;
 
-  ctxCopy.scale(scale, scale);
+    ctxCopy.scale(scale, scale);
 
-  ctxCopy.drawImage($canvas, 0, 0);
+    ctxCopy.drawImage($canvas, 0, 0);
 
-  canvasCopy.toBlob(
-    blob => {
-      const url = URL.createObjectURL(blob);
-      newImg.onload = () => URL.revokeObjectURL(url);
-      newImg.src = url;
-      newImg.classList.add(`${nameSpace}__snapshot`);
-    },
-    'image/jpeg',
-    quality,
-  );
+    try {
+      canvasCopy.toBlob(
+        blob => {
+          const url = URL.createObjectURL(blob);
+          newImg.onload = () => URL.revokeObjectURL(url);
+          newImg.src = url;
+          newImg.classList.add(`${nameSpace}__snapshot`);
+        },
+        'image/jpeg',
+        quality,
+      );
+    } catch (error) {
+      reject(error);
+    }
 
-  return newImg;
-};
+    resolve(newImg);
+  });
 
 /**
  * An Helper function which is used to define the items that are used to compose
@@ -542,8 +549,9 @@ const frameHelper = (anim, $canvas, config, pixels) => {
                              </span>`;
 
   if (useSnapshots === true) {
-    window.requestAnimationFrame(() =>
-      screenShotItem.appendChild(takeSnapshot($canvas, scale, quality)),
+    takeSnapshot($canvas, scale, quality).then(
+      img => screenShotItem.appendChild(img),
+      reason => console.error('Something went wrong', reason),
     );
   }
 
@@ -737,6 +745,7 @@ class GameOfLife {
    */
   stop() {
     if (this.isAnimating() === true) {
+      this.animation.stop();
       const { $element: $frameList } = this.config.timeFrame;
       // when the frameList contains a least one child append it to
       if (this.timeFrame.childElementCount > 0) {
@@ -746,7 +755,6 @@ class GameOfLife {
           $frameList.parentNode.setAttribute('style', 'visibility:visible');
         });
       }
-      this.animation.stop();
     }
   }
 
